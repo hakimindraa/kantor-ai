@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #1E222A;
+  --bg-surface: #262B35;
+  --bg-surface-elevated: #313744;
+  --border-hairline: #3D4454;
+  --border-strong: #5A6478;
+  --text-primary: #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+}
+
+body {
+  background-color: #1E222A;
+  color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* Tabular numerals for precision metrics */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sharp industrial scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1E222A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748B;
+}
+
+/* Industrial Studio surface card utility - Luminous Soft Black & Fresh Slate Gray */
+.industrial-card {
+  background-color: #262B35;
+  border: 1px solid #3D4454;
+  border-radius: 0px;
+}
+
+.industrial-card:hover {
+  border-color: #5A6478;
+}
