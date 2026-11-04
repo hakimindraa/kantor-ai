@@ -140,10 +140,13 @@ npm install --legacy-peer-deps
 ```
 
 ### 3. Konfigurasi Environment Variables (Opsional)
-Buat file `.env.local` di direktori root jika ingin menghubungkan database Neon Postgres sungguhan (sistem otomatis fallback ke mock data jika tidak ada):
-```env
-DATABASE_URL=postgres://user:password@ep-sample-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+Aplikasi ini sudah dilengkapi sistem simulasi mandiri (*built-in mock dataset*) dan dapat langsung dijalankan tanpa konfigurasi tambahan (*zero-config*).
+
+Jika Anda ingin menghubungkan ke database atau integrasi eksternal sendiri, salin file template `.env.example` menjadi `.env.local`:
+```bash
+cp .env.example .env.local
 ```
+Lalu isi variabel yang dibutuhkan sesuai lingkungan Anda secara lokal (file `.env.local` sudah terlindungi dan tidak akan terunggah ke repositori publik).
 
 ### 4. Jalankan Server Pengembangan
 ```bash
