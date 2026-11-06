@@ -9,15 +9,15 @@ import { useOfficeStore } from '@/store/officeStore';
 import { CameraPreset } from '@/types/office';
 
 const PRESET_COORDINATES: Record<CameraPreset, { pos: [number, number, number]; target: [number, number, number] }> = {
-  ISOMETRIC: { pos: [17, 18, 17], target: [0, 1.0, 0] },
-  OVERVIEW: { pos: [0, 24, 12], target: [0, 0, 0] },
-  WORKSTATIONS: { pos: [-7.0, 8.5, 9], target: [-7.0, 1.0, 0] },
-  STUDIO_FOTO: { pos: [6.5, 8.5, 9], target: [6.5, 1.0, 0.5] }, // Breakroom / Kitchen
-  RUANG_RAPAT: { pos: [-7.0, 8.5, 9], target: [-7.0, 1.0, 0] },
-  PEMIMPIN_REDAKSI: { pos: [6.5, 8.5, 9], target: [6.5, 1.0, 0.5] },
-  SENTRY_SERVER: { pos: [-7.0, 5.5, -2.5], target: [-7.0, 1.2, -6.5] }, // DevOps Server
-  RECEPTION: { pos: [6.5, 8.5, 9], target: [6.5, 1.0, 0.5] },
-  LOUNGE: { pos: [6.5, 8.5, 9], target: [6.5, 1.0, 0.5] },
+  ISOMETRIC: { pos: [24, 24, 24], target: [0, 1.0, 0] },
+  OVERVIEW: { pos: [0, 32, 16], target: [0, 0, 0] },
+  WORKSTATIONS: { pos: [-13.5, 9.5, 9.5], target: [-13.5, 1.0, 0] }, // Sayap Barat Redaksi AdaFakta
+  STUDIO_FOTO: { pos: [0.0, 9.0, 9.0], target: [0.0, 1.0, -1.0] }, // Kopi Tarak Hub
+  RUANG_RAPAT: { pos: [-13.5, 9.5, 9.5], target: [-13.5, 1.0, 0] },
+  PEMIMPIN_REDAKSI: { pos: [-18.5, 6.0, 4.0], target: [-18.5, 1.0, 0] },
+  SENTRY_SERVER: { pos: [13.5, 9.5, 9.5], target: [13.5, 1.0, 0] }, // Sayap Timur Radar Intelijen
+  RECEPTION: { pos: [0.0, 6.5, 9.5], target: [0.0, 1.0, 4.5] },
+  LOUNGE: { pos: [0.0, 8.5, 9.0], target: [0.0, 1.0, 1.5] },
   FOCUS_AGENT: { pos: [0, 6, 6], target: [0, 1, 0] }
 };
 

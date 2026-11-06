@@ -289,12 +289,68 @@ class EventBridge {
     contentSnippet?: string;
   }) {
     const store = useOfficeStore.getState();
-    const targetAgentId: AgentId = (event.agentId as AgentId) || 'scribe';
+    const isBotteleAction = event.action.startsWith('bottele_');
+    const targetAgentId: AgentId = (event.agentId as AgentId) || (isBotteleAction ? 'scout' : 'scribe');
 
     // 1. Target agent stops chilling and returns to PC desk
     store.setAgentWorking(targetAgentId);
 
-    // 2. Play sound & trigger hologram
+    // 2. Specialized handling for Bot Tele Jurnalis Radar vs AdaFakta Redaksi
+    if (isBotteleAction) {
+      if (event.action === 'bottele_rss_scraped') {
+        store.incrementBotTeleStat('monitoredTechCount');
+        soundManager.playKeyboardClick();
+        this.dispatchHologram({
+          agentId: targetAgentId,
+          type: 'RSS_BREAKING',
+          title: '📡 6 RSS TECH SCOUTED',
+          subtitle: `${event.source || 'Radar Tekno'}: ${event.title.substring(0, 36)}`,
+          timestamp: Date.now()
+        });
+      } else if (event.action === 'bottele_dispatch_telegram') {
+        store.incrementBotTeleStat('dispatchedTelegramCount');
+        soundManager.playTelegramPing();
+        this.dispatchHologram({
+          agentId: targetAgentId,
+          type: 'TELEGRAM_ALERT',
+          title: '📱 BOT TELEGRAM DISPATCH',
+          subtitle: event.title.substring(0, 38),
+          timestamp: Date.now()
+        });
+      } else if (event.action === 'bottele_synced_adafakta') {
+        store.incrementBotTeleStat('sentToAdaFaktaCount');
+        soundManager.playPublishChime();
+        this.dispatchHologram({
+          agentId: targetAgentId,
+          type: 'SEO_PING',
+          title: '🛡️ DISETOR KE REDAKSI',
+          subtitle: event.title.substring(0, 38),
+          timestamp: Date.now()
+        });
+      } else {
+        soundManager.playKeyboardClick();
+        this.dispatchHologram({
+          agentId: targetAgentId,
+          type: 'GEMINI_DRAFT',
+          title: `📡 RADAR: ${event.action.replace('bottele_', '').toUpperCase()}`,
+          subtitle: event.title.substring(0, 42),
+          timestamp: Date.now()
+        });
+      }
+
+      // Activity log for Bot Tele Jurnalis
+      store.addActivityLog({
+        agentId: targetAgentId,
+        agentName: targetAgentId.toUpperCase(),
+        agentColor: '#10B981',
+        category: 'fetch',
+        level: 'success',
+        message: `[RADAR BOT TELE] ${targetAgentId.toUpperCase()} menerima event ${event.action}: "${event.title.substring(0, 42)}..."`
+      });
+      return;
+    }
+
+    // Standard AdaFakta Webhook Handling
     const isPublish = event.action === 'article_published';
     if (isPublish) {
       soundManager.playPublishChime();

@@ -8,7 +8,8 @@ import {
   VolumeX,
   PlusCircle,
   Maximize2,
-  Menu
+  Menu,
+  ExternalLink
 } from 'lucide-react';
 
 export const TopNav: React.FC = () => {
@@ -115,6 +116,30 @@ export const TopNav: React.FC = () => {
         >
           <Maximize2 className="w-3.5 h-3.5" />
         </button>
+
+        {/* Quick External Portals Navigation */}
+        <div className="hidden xl:flex items-center gap-1.5 border-l border-[#3D4454] pl-2 text-[10px] font-mono">
+          <a
+            href="https://www.adafakta.web.id/admin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2 py-1 bg-blue-950/60 hover:bg-blue-900 text-blue-300 border border-blue-800 transition-colors"
+            title="Buka Web Admin AdaFakta"
+          >
+            <span>AdaFakta</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
+          <a
+            href="https://bottelejurnalis.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2 py-1 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 transition-colors"
+            title="Buka Bot Jurnalis Radar"
+          >
+            <span>Radar Bot</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
+        </div>
 
         {/* Admin Profile Monochromatic Badge */}
         <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-[#3D4454]">

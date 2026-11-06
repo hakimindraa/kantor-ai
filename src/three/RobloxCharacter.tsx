@@ -99,6 +99,45 @@ const AGENT_THOUGHTS: Record<string, { work: string[]; chill: string[] }> = {
       '“Santai dulu bareng tim di bar...”',
       '“Kopi susu gula aren enak nih.”'
     ]
+  },
+  veritas: {
+    work: [
+      '“Memverifikasi klaim fakta narasumber...”',
+      '“Cross-check multi-sumber berita tekno...”',
+      '“Saring rumor & clickbait dari feed...”',
+      '“Tingkat akurasi fakta 99.8% valid!”'
+    ],
+    chill: [
+      '“Semua fakta sudah diverifikasi, santai dulu...”',
+      '“Kopi Tarak terbukti 100% nikmat.”',
+      '“Rehat sejenak sambil baca rilis pers.”'
+    ]
+  },
+  telebot: {
+    work: [
+      '“Konsol bot Telegram aktif: terima liputan...”',
+      '“Dispatch alert kilat ke bottelejurnalis...”',
+      '“Sinkronisasi laporan jurnalis lapangan...”',
+      '“Alert breaking news dipancarkan!”'
+    ],
+    chill: [
+      '“Bot berjalan otonom 24/7, rileks dulu...”',
+      '“Cek respon Telegram sambil ngopi...”',
+      '“Kopi Tarak bikin kerja makin fokus.”'
+    ]
+  },
+  cipher: {
+    work: [
+      '“Riset topik mendalam di AI Studio...”',
+      '“Sadur URL berita teknologi global...”',
+      '“Ekstraksi inti data & konseptualisasi...”',
+      '“Sintesis ringkasan eksekutif siap!”'
+    ],
+    chill: [
+      '“Riset tuntas, saatnya santai di lounge...”',
+      '“Ide riset baru muncul saat ngopi santai.”',
+      '“Suasana kantor AI tenang & nyaman.”'
+    ]
   }
 };
 
@@ -419,7 +458,6 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
           visorGlow: '#BEF264'
         };
       case 'hermes':
-      default:
         return {
           mainColor: '#F97316',   // Soft Tangerine Orange
           torso: '#FB923C',       // Warm soft tangerine courier jacket
@@ -430,6 +468,46 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
           hatBase: '#EA580C',     // Courier cap
           hatCrown: '#F97316',
           hatRibbon: '#FFEDD5'
+        };
+      case 'veritas':
+        return {
+          mainColor: '#E2E8F0',   // Sleek Silver White
+          torso: '#CBD5E1',       // Silver Investigator Trenchcoat
+          sleeve: '#CBD5E1',
+          accent: '#0F172A',      // Dark contrast lapels
+          tie: '#0F172A',
+          legs: '#1E293B',
+          hatBase: '#94A3B8',
+          hatCrown: '#CBD5E1',
+          hatRibbon: '#38BDF8',
+          glasses: '#0284C7'
+        };
+      case 'telebot':
+        return {
+          mainColor: '#0088CC',   // Telegram Official Blue
+          torso: '#0284C7',       // Cyber Sky Blue Bomber Jacket
+          sleeve: '#0284C7',
+          accent: '#FFFFFF',      // Paper Plane White Emblem
+          tie: '#0369A1',
+          legs: '#0F172A',
+          hatBase: '#0284C7',
+          hatCrown: '#0369A1',
+          hatRibbon: '#BAE6FD',
+          antenna: '#38BDF8'
+        };
+      case 'cipher':
+      default:
+        return {
+          mainColor: '#059669',   // Emerald Tech
+          torso: '#10B981',       // Data Analyst Labcoat
+          sleeve: '#047857',
+          accent: '#A7F3D0',      // Glowing Green HUD Patch
+          tie: '#064E3B',
+          legs: '#1E293B',
+          hatBase: '#047857',
+          hatCrown: '#059669',
+          hatRibbon: '#D1FAE5',
+          visorGlow: '#34D399'
         };
     }
   }, [agent.id]);

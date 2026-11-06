@@ -133,6 +133,21 @@ export const SIMULATION_TEMPLATES: Record<AgentId, string[]> = {
   chief: [
     'Meninjau ringkasan performa editorial harian: 18 artikel terpublikasi.',
     'Memberikan persetujuan untuk liputan khusus teknologi kecerdasan buatan.'
+  ],
+  veritas: [
+    'Memeriksa silang klaim berita dengan basis data fakta komparatif.',
+    'Investigasi anti-hoaks: skor verifikasi kredibilitas sumber 99.4%.',
+    'Menyaring distorsi informasi pada feed breaking news teknologi.'
+  ],
+  telebot: [
+    'Menghubungkan sinyal liputan bot jurnalis telegram bottelejurnalis.vercel.app.',
+    'Meneruskan alert breaking news TEKNO ke kanal jurnalis.',
+    'Sinkronisasi 6 kanal RSS aktif: TechCrunch, The Verge, DetikINET.'
+  ],
+  cipher: [
+    'Riset mendalam topik AI & komputasi awan via AI Studio Redaksi.',
+    'Menganalisis tren pasar chip semikonduktor dan startup AI global.',
+    'Menyusun dossier intelijen teknologi untuk bahan draf redaktur.'
   ]
 };
 

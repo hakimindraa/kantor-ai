@@ -102,13 +102,13 @@ export const Sidebar: React.FC = () => {
             })}
           </nav>
 
-          {/* Seven AI Agents Live Roster */}
+          {/* AI Agents Live Roster (West & East Wings) */}
           <div className="px-2 pt-3 border-t border-[#3D4454] mt-2">
             <div className="flex items-center justify-between px-3 py-1 text-[9px] font-mono font-bold text-neutral-400 tracking-widest uppercase">
-              <span>AI Agents [7]</span>
+              <span>AI AGENTS [{mainAgents.length}]</span>
               <span className="text-neutral-300 font-mono flex items-center gap-1.5 text-[9px]">
-                <span className="w-1.5 h-1.5 rounded-none bg-neutral-300" />
-                <span>ACTIVE</span>
+                <span className="w-1.5 h-1.5 rounded-none bg-emerald-400 animate-pulse" />
+                <span>ONLINE</span>
               </span>
             </div>
 

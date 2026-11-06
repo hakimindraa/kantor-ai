@@ -1,4 +1,16 @@
-export type AgentId = 'scout' | 'scribe' | 'pixel' | 'chronos' | 'hermes' | 'radar' | 'sentry' | 'receptionist' | 'chief';
+export type AgentId =
+  | 'scout'
+  | 'scribe'
+  | 'pixel'
+  | 'chronos'
+  | 'hermes'
+  | 'radar'
+  | 'sentry'
+  | 'receptionist'
+  | 'chief'
+  | 'veritas'
+  | 'telebot'
+  | 'cipher';
 
 export type AgentStatus = 'working' | 'idle' | 'active' | 'paused';
 

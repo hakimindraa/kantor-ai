@@ -15,19 +15,36 @@ export interface OfficeStats {
 }
 
 export const INITIAL_OFFICE_STATS: OfficeStats = {
-  activeAgents: 7,
-  totalAgents: 7,
-  articlesToday: 18,
-  articlesTodayTarget: 24,
-  articlesTrendPercent: 24.5,
-  inQueue: 6,
-  publishedToday: 12,
-  nextPublishTime: '20:45 WIB',
+  activeAgents: 10,
+  totalAgents: 10,
+  articlesToday: 181,
+  articlesTodayTarget: 181,
+  articlesTrendPercent: 100,
+  inQueue: 0,
+  publishedToday: 181,
+  nextPublishTime: 'Standby / Realtime',
   serverHealth: 99.98,
-  serverLatencyMs: 24,
-  bandwidthSavedMb: 428,
-  telegramAlertsSent: 46,
+  serverLatencyMs: 18,
+  bandwidthSavedMb: 842,
+  telegramAlertsSent: 181,
   indexingSuccessRate: 100
+};
+
+export interface BotTeleStats {
+  activeRssCount: number;
+  monitoredTechCount: number;
+  dispatchedTelegramCount: number;
+  sentToAdaFaktaCount: number;
+  lastScrapedSource?: string;
+  isScrapingActive?: boolean;
+}
+
+export const INITIAL_BOTTELE_STATS: BotTeleStats = {
+  activeRssCount: 6,
+  monitoredTechCount: 0,
+  dispatchedTelegramCount: 0,
+  sentToAdaFaktaCount: 0,
+  lastScrapedSource: 'TechCrunch'
 };
 
 export const HOURLY_ARTICLES_DATA = [

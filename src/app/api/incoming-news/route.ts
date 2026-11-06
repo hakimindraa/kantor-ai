@@ -71,17 +71,22 @@ export async function POST(request: Request) {
     let defaultAgent = 'scribe';
     if (action === 'article_published') defaultAgent = 'chronos';
     else if (action === 'cover_generated') defaultAgent = 'pixel';
-    else if (action === 'fact_check') defaultAgent = 'radar';
-    else if (action === 'breaking_news') defaultAgent = 'scout';
+    else if (action === 'fact_check' || action === 'bottele_fact_checked') defaultAgent = 'veritas';
+    else if (action === 'breaking_news' || action === 'bottele_rss_scraped') defaultAgent = 'scout';
     else if (action === 'system_alert') defaultAgent = 'sentry';
+    else if (action === 'bottele_dispatch_telegram') defaultAgent = 'telebot';
+    else if (action === 'bottele_synced_adafakta') defaultAgent = 'veritas';
+    else if (action === 'bottele_ai_research') defaultAgent = 'cipher';
+
+    const isBotteleAction = action.startsWith('bottele_');
 
     const event: WebhookEventItem = {
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       action,
       agentId: body.agentId || defaultAgent,
-      title: body.title || 'Update Berita Terkini AdaFakta',
-      category: body.category || 'Nasional',
-      source: body.source || 'AdaFakta Admin Webhook',
+      title: body.title || (isBotteleAction ? 'Radar Intelijen Tekno Baru' : 'Update Berita Terkini AdaFakta'),
+      category: body.category || (isBotteleAction ? 'Teknologi' : 'Nasional'),
+      source: body.source || (isBotteleAction ? 'Bot Tele Jurnalis Radar' : 'AdaFakta Admin Webhook'),
       coverUrl: body.coverUrl,
       contentSnippet: body.contentSnippet,
       author: body.author,

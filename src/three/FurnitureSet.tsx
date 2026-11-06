@@ -433,33 +433,33 @@ export const SentryServerRackBay: React.FC<{ position: [number, number, number] 
   );
 };
 
-// ================= 1. REDAKSI AI WORKSTATION BAY =================
+// ================= 1. REDAKSI AI WORKSTATION BAY (SAYAP BARAT) =================
 export const OpenOfficeWorkstations: React.FC = () => {
   return (
     <group>
-      {/* Central Desk Island (centered at X = -7.0, Z = 0) */}
-      <group position={[-7.0, 0, 0]}>
-        {/* Row 1 Desk Slab (North Desk: Z = -0.6, length = 9.8, width = 1.2) - Fresh Architectural Stone/Composite */}
+      {/* Central Desk Island in Sayap Barat (centered at X = -13.5, Z = 0) */}
+      <group position={[-13.5, 0, 0]}>
+        {/* Row 1 Desk Slab (North Desk: Z = -0.6, length = 8.5, width = 1.2) */}
         <mesh position={[0, 0.72, -0.6]} castShadow receiveShadow>
-          <boxGeometry args={[9.8, 0.06, 1.2]} />
+          <boxGeometry args={[8.5, 0.06, 1.2]} />
           <meshStandardMaterial color="#EDF2F7" roughness={0.3} />
         </mesh>
 
-        {/* Center Fabric Acoustic Privacy Divider - Fresh Cool Slate */}
+        {/* Center Fabric Acoustic Privacy Divider */}
         <mesh position={[0, 0.95, 0]} castShadow>
-          <boxGeometry args={[9.8, 0.4, 0.06]} />
+          <boxGeometry args={[8.5, 0.4, 0.06]} />
           <meshStandardMaterial color="#475569" roughness={0.8} />
         </mesh>
 
-        {/* Row 2 Desk Slab (South Desk: Z = +0.6, length = 9.8, width = 1.2) - Fresh Architectural Stone/Composite */}
+        {/* Row 2 Desk Slab (South Desk: Z = +0.6, length = 8.5, width = 1.2) */}
         <mesh position={[0, 0.72, 0.6]} castShadow receiveShadow>
-          <boxGeometry args={[9.8, 0.06, 1.2]} />
+          <boxGeometry args={[8.5, 0.06, 1.2]} />
           <meshStandardMaterial color="#EDF2F7" roughness={0.3} />
         </mesh>
 
-        {/* Desk Legs - Soft Slate Steel */}
-        {[-4.6, -1.5, 1.5, 4.6].map((x, i) => (
-          <React.Fragment key={`leg-${i}`}>
+        {/* Desk Legs */}
+        {[-3.8, -1.2, 1.2, 3.8].map((x, i) => (
+          <React.Fragment key={`leg-w-${i}`}>
             <mesh position={[x, 0.36, -1.15]}>
               <boxGeometry args={[0.07, 0.72, 0.07]} />
               <meshStandardMaterial color="#2D313A" metalness={0.7} />
@@ -473,50 +473,37 @@ export const OpenOfficeWorkstations: React.FC = () => {
       </group>
 
       {/* ================= ROW 1 DEDICATED DESKTOPS & CHAIRS ================= */}
-      {/* SCOUT Desk: X = -10.5 */}
-      <DesktopPC position={[-10.5, 0.75, -0.25]} rotation={Math.PI} agentId="scout" label="SCOUT" />
-      <OfficeChair position={[-10.5, 0, -1.35]} rotation={0} />
+      {/* SCRIBE Desk: X = -15.0 */}
+      <DesktopPC position={[-15.0, 0.75, -0.25]} rotation={Math.PI} agentId="scribe" label="SCRIBE" />
+      <OfficeChair position={[-15.0, 0, -1.35]} rotation={0} />
 
-      {/* SCRIBE Desk: X = -8.2 */}
-      <DesktopPC position={[-8.2, 0.75, -0.25]} rotation={Math.PI} agentId="scribe" label="SCRIBE" />
-      <OfficeChair position={[-8.2, 0, -1.35]} rotation={0} />
-
-      {/* PIXEL Desk: X = -5.8 */}
-      <DesktopPC position={[-5.8, 0.75, -0.25]} rotation={Math.PI} agentId="pixel" label="PIXEL" />
-      <OfficeChair position={[-5.8, 0, -1.35]} rotation={0} />
-
-      {/* CHRONOS Desk: X = -3.5 */}
-      <DesktopPC position={[-3.5, 0.75, -0.25]} rotation={Math.PI} agentId="chronos" label="CHRONOS" />
-      <OfficeChair position={[-3.5, 0, -1.35]} rotation={0} />
+      {/* PIXEL Desk: X = -12.0 */}
+      <DesktopPC position={[-12.0, 0.75, -0.25]} rotation={Math.PI} agentId="pixel" label="PIXEL" />
+      <OfficeChair position={[-12.0, 0, -1.35]} rotation={0} />
 
       {/* ================= ROW 2 DEDICATED DESKTOPS & CHAIRS ================= */}
-      {/* RADAR Desk: X = -10.5 */}
-      <DesktopPC position={[-10.5, 0.75, 0.25]} rotation={0} agentId="radar" label="RADAR" />
-      <OfficeChair position={[-10.5, 0, 1.35]} rotation={Math.PI} />
+      {/* CHRONOS Desk: X = -15.0 */}
+      <DesktopPC position={[-15.0, 0.75, 0.25]} rotation={0} agentId="chronos" label="CHRONOS" />
+      <OfficeChair position={[-15.0, 0, 1.35]} rotation={Math.PI} />
 
-      {/* SENTRY Desk: X = -8.2 */}
-      <DesktopPC position={[-8.2, 0.75, 0.25]} rotation={0} agentId="sentry" label="SENTRY" />
-      <OfficeChair position={[-8.2, 0, 1.35]} rotation={Math.PI} />
+      {/* HERMES Desk: X = -12.0 */}
+      <DesktopPC position={[-12.0, 0.75, 0.25]} rotation={0} agentId="hermes" label="HERMES" />
+      <OfficeChair position={[-12.0, 0, 1.35]} rotation={Math.PI} />
 
-      {/* HERMES Desk: X = -5.8 */}
-      <DesktopPC position={[-5.8, 0.75, 0.25]} rotation={0} agentId="hermes" label="HERMES" />
-      <OfficeChair position={[-5.8, 0, 1.35]} rotation={Math.PI} />
-
-      {/* Spare / Chief Redaktur Desk: X = -3.5 */}
-      <DesktopPC position={[-3.5, 0.75, 0.25]} rotation={0} label="SPARE" />
-      <OfficeChair position={[-3.5, 0, 1.35]} rotation={Math.PI} />
+      {/* RADAR Desk: X = -9.0 */}
+      <DesktopPC position={[-9.0, 0.75, 0.25]} rotation={0} agentId="radar" label="RADAR" />
+      <OfficeChair position={[-9.0, 0, 1.35]} rotation={Math.PI} />
 
       {/* ================= SENTRY DEVOPS SERVER RACK BAY ================= */}
-      <SentryServerRackBay position={[-7.0, 0, -6.8]} />
+      <SentryServerRackBay position={[-18.5, 0, -6.8]} />
 
-      {/* Low Bookshelves & Plants along front edge Z = 4.4 - Fresh Slate & Charcoal */}
-      {[-10.2, -7.0, -3.8].map((x, idx) => (
-        <group key={`shelf-${idx}`} position={[x, 0, 4.4]}>
+      {/* Low Bookshelves along front edge Z = 4.4 */}
+      {[-16.0, -12.0].map((x, idx) => (
+        <group key={`shelf-w-${idx}`} position={[x, 0, 4.4]}>
           <mesh position={[0, 0.45, 0]} castShadow>
             <boxGeometry args={[2.4, 0.9, 0.6]} />
             <meshStandardMaterial color="#2D313A" roughness={0.6} />
           </mesh>
-          {/* Architectural Book blocks in fresh light slate */}
           <mesh position={[-0.4, 0.45, 0]}>
             <boxGeometry args={[0.5, 0.5, 0.4]} />
             <meshStandardMaterial color="#CBD5E1" roughness={0.4} />
@@ -525,22 +512,13 @@ export const OpenOfficeWorkstations: React.FC = () => {
             <boxGeometry args={[0.5, 0.5, 0.4]} />
             <meshStandardMaterial color="#94A3B8" roughness={0.4} />
           </mesh>
-          {/* Minimalist Plant Pot & Foliage */}
-          <mesh position={[0, 1.0, 0]}>
-            <cylinderGeometry args={[0.15, 0.1, 0.2, 10]} />
-            <meshStandardMaterial color="#282B33" />
-          </mesh>
-          <mesh position={[0, 1.25, 0]}>
-            <dodecahedronGeometry args={[0.2, 0]} />
-            <meshStandardMaterial color="#64748B" roughness={0.7} />
-          </mesh>
         </group>
       ))}
     </group>
   );
 };
 
-// ================= 2. BAR "KOPI TARAK" (BREAKROOM & CAFE LOUNGE) =================
+// ================= 2. BAR "KOPI TARAK" (CENTRAL HUB & CAFE LOUNGE) =================
 export const BreakroomKitchenLounge: React.FC = () => {
   const signTexture = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -550,13 +528,11 @@ export const BreakroomKitchenLounge: React.FC = () => {
   return (
     <group>
       {/* ================= 1. ILLUMINATED OVERHEAD SIGNBOARD "KOPI TARAK" ================= */}
-      <group position={[6.5, 3.4, -2.2]}>
-        {/* Soft Charcoal Signboard Frame */}
+      <group position={[0.0, 3.4, -4.5]}>
         <mesh castShadow>
           <boxGeometry args={[5.2, 1.5, 0.12]} />
           <meshStandardMaterial color="#282B33" roughness={0.5} metalness={0.7} />
         </mesh>
-        {/* Hanging Iron Cables connecting to ceiling */}
         <mesh position={[-2.2, 1.0, 0]}>
           <cylinderGeometry args={[0.02, 0.02, 1.2, 8]} />
           <meshStandardMaterial color="#CBD5E1" metalness={0.8} />
@@ -565,8 +541,6 @@ export const BreakroomKitchenLounge: React.FC = () => {
           <cylinderGeometry args={[0.02, 0.02, 1.2, 8]} />
           <meshStandardMaterial color="#CBD5E1" metalness={0.8} />
         </mesh>
-
-        {/* Front Glowing "KOPI TARAK" Face */}
         {signTexture && (
           <mesh position={[0, 0, 0.065]}>
             <planeGeometry args={[5.0, 1.35]} />
@@ -577,18 +551,15 @@ export const BreakroomKitchenLounge: React.FC = () => {
 
       {/* ================= 2. HANGING BAR PENDANT LAMPS ================= */}
       {[-1.8, 0, 1.8].map((xOffset, idx) => (
-        <group key={`pendant-${idx}`} position={[6.5 + xOffset, 3.0, -2.2]}>
-          {/* Wire */}
+        <group key={`pendant-${idx}`} position={[0.0 + xOffset, 3.0, -4.5]}>
           <mesh position={[0, 0.4, 0]}>
             <cylinderGeometry args={[0.015, 0.015, 0.8, 8]} />
             <meshStandardMaterial color="#282B33" />
           </mesh>
-          {/* Fresh Slate Metal Dome Shade */}
           <mesh position={[0, 0, 0]}>
             <cylinderGeometry args={[0.08, 0.28, 0.24, 16]} />
             <meshStandardMaterial color="#353942" metalness={0.7} roughness={0.4} />
           </mesh>
-          {/* Glowing Bulb */}
           <mesh position={[0, -0.06, 0]}>
             <sphereGeometry args={[0.07, 12, 12]} />
             <meshBasicMaterial color="#FFFFFF" />
@@ -596,105 +567,59 @@ export const BreakroomKitchenLounge: React.FC = () => {
         </group>
       ))}
 
-      {/* Warm Ambient Spotlight on Kopi Tarak Bar */}
-      <pointLight position={[6.5, 2.6, -2.2]} color="#FFFFFF" intensity={1.2} distance={10} />
+      <pointLight position={[0.0, 2.6, -4.5]} color="#FFFFFF" intensity={1.2} distance={10} />
 
       {/* ================= 3. MAIN FRONT BAR COUNTER (KOPI TARAK) ================= */}
-      <group position={[6.5, 0, -2.2]}>
-        {/* Main Bar Counter Base - Soft Charcoal Fluted Panels */}
+      <group position={[0.0, 0, -4.5]}>
         <mesh position={[0, 0.52, 0]} castShadow receiveShadow>
           <boxGeometry args={[5.6, 1.04, 1.1]} />
           <meshStandardMaterial color="#2E323B" roughness={0.7} />
         </mesh>
-        {/* Silver Slate Steel Footrail along the front */}
         <mesh position={[0, 0.15, 0.6]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.03, 0.03, 5.4, 12]} />
           <meshStandardMaterial color="#CBD5E1" metalness={0.8} roughness={0.2} />
         </mesh>
-        {/* Luminous Italian White Quartz Countertop */}
         <mesh position={[0, 1.06, 0]} castShadow receiveShadow>
           <boxGeometry args={[5.8, 0.08, 1.25]} />
           <meshStandardMaterial color="#F8FAFC" roughness={0.25} />
         </mesh>
 
-        {/* --- PROPS ON THE BAR COUNTER --- */}
-        {/* Commercial Multi-Head Chrome Espresso Machine */}
+        {/* Commercial Multi-Head Espresso Machine */}
         <group position={[-1.6, 1.26, 0]}>
           <mesh castShadow>
             <boxGeometry args={[0.95, 0.48, 0.55]} />
             <meshStandardMaterial color="#353942" metalness={0.8} roughness={0.3} />
           </mesh>
-          {/* Chrome Cup Warmer Tray on top */}
           <mesh position={[0, 0.25, 0]}>
             <boxGeometry args={[0.88, 0.03, 0.48]} />
             <meshStandardMaterial color="#CBD5E1" metalness={0.9} />
           </mesh>
-          {/* Mini Stack of Ceramic Espresso Cups */}
-          {[-0.25, 0, 0.25].map((cx, i) => (
-            <mesh key={`cup-top-${i}`} position={[cx, 0.32, 0]}>
-              <cylinderGeometry args={[0.06, 0.04, 0.1, 10]} />
-              <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-            </mesh>
-          ))}
-          {/* Gauges */}
-          <mesh position={[-0.2, 0.1, 0.29]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.04, 0.04, 0.02, 12]} />
-            <meshStandardMaterial color="#CBD5E1" />
-          </mesh>
-          <mesh position={[0.2, 0.1, 0.29]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.04, 0.04, 0.02, 12]} />
-            <meshStandardMaterial color="#CBD5E1" />
-          </mesh>
         </group>
 
-        {/* Coffee Grinder next to espresso machine */}
+        {/* Coffee Grinder */}
         <group position={[-0.8, 1.32, -0.05]}>
           <mesh castShadow>
             <cylinderGeometry args={[0.09, 0.12, 0.45, 12]} />
             <meshStandardMaterial color="#282B33" metalness={0.7} />
           </mesh>
-          {/* Clear Hopper */}
-          <mesh position={[0, 0.3, 0]}>
-            <cylinderGeometry args={[0.12, 0.08, 0.22, 12]} />
-            <meshPhysicalMaterial color="#475569" transmission={0.7} transparent opacity={0.85} />
-          </mesh>
         </group>
 
-        {/* Glass Pastry Display Case */}
+        {/* Pastry Display */}
         <group position={[1.6, 1.25, 0]}>
-          {/* Display Base */}
           <mesh position={[0, -0.15, 0]}>
             <boxGeometry args={[1.1, 0.06, 0.55]} />
             <meshStandardMaterial color="#282B33" />
           </mesh>
-          {/* Glass Cover */}
           <mesh position={[0, 0.05, 0]}>
             <boxGeometry args={[1.05, 0.32, 0.5]} />
             <meshPhysicalMaterial color="#F8FAFC" transmission={0.9} transparent opacity={0.4} roughness={0.1} />
           </mesh>
-          {/* Pastries Inside - Stylized Grayscale */}
-          <mesh position={[-0.25, -0.05, 0]}>
-            <torusGeometry args={[0.08, 0.04, 8, 16]} />
-            <meshStandardMaterial color="#64748B" roughness={0.6} />
-          </mesh>
-          <mesh position={[0.25, -0.05, 0]}>
-            <boxGeometry args={[0.16, 0.08, 0.12]} />
-            <meshStandardMaterial color="#CBD5E1" roughness={0.7} />
-          </mesh>
-        </group>
-
-        {/* Tip Jar */}
-        <group position={[0.7, 1.18, 0.2]}>
-          <mesh>
-            <cylinderGeometry args={[0.07, 0.06, 0.14, 12]} />
-            <meshPhysicalMaterial color="#F8FAFC" transmission={0.85} transparent opacity={0.5} />
-          </mesh>
         </group>
       </group>
 
-      {/* 4 Soft Charcoal & Slate Barstools along front of Kopi Tarak Bar */}
+      {/* 4 Barstools along front of Kopi Tarak Bar */}
       {[-1.8, -0.6, 0.6, 1.8].map((xOffset, idx) => (
-        <group key={`kopi-stool-${idx}`} position={[6.5 + xOffset, 0, -1.1]}>
+        <group key={`kopi-stool-${idx}`} position={[0.0 + xOffset, 0, -3.2]}>
           <mesh position={[0, 0.42, 0]}>
             <cylinderGeometry args={[0.04, 0.08, 0.84, 8]} />
             <meshStandardMaterial color="#64748B" metalness={0.7} />
@@ -706,148 +631,100 @@ export const BreakroomKitchenLounge: React.FC = () => {
         </group>
       ))}
 
-      {/* ================= 4. BACK BAR COUNTER, SHELVES & REFRIGERATOR ================= */}
-      <group position={[6.5, 0, -6.8]}>
-        {/* Back Lower Cabinets - Soft Charcoal */}
+      {/* Back Bar Counter & Shelves */}
+      <group position={[0.0, 0, -7.2]}>
         <mesh position={[0, 0.45, 0]} castShadow>
           <boxGeometry args={[6.4, 0.9, 0.85]} />
           <meshStandardMaterial color="#2A2D35" roughness={0.6} />
         </mesh>
-        {/* Countertop - Fresh Stone Slate */}
         <mesh position={[0, 0.92, 0]}>
           <boxGeometry args={[6.5, 0.05, 0.9]} />
           <meshStandardMaterial color="#E2E8F0" roughness={0.3} />
         </mesh>
-
-        {/* Multi-Tier Back-Bar Shelving with Bottles */}
-        {[-1.8, 0, 1.8].map((sx, sidx) => (
-          <group key={`shelf-col-${sidx}`} position={[sx, 1.8, 0.2]}>
-            {/* Slate Shelves */}
-            <mesh position={[0, 0, 0]}>
-              <boxGeometry args={[1.5, 0.04, 0.35]} />
-              <meshStandardMaterial color="#475569" />
-            </mesh>
-            <mesh position={[0, 0.5, 0]}>
-              <boxGeometry args={[1.5, 0.04, 0.35]} />
-              <meshStandardMaterial color="#475569" />
-            </mesh>
-            {/* Coffee Syrup Bottles in Fresh Smoke Slate */}
-            {[-0.45, -0.15, 0.15, 0.45].map((bx, bidx) => (
-              <mesh key={`bot-${bidx}`} position={[bx, 0.18, 0]}>
-                <cylinderGeometry args={[0.04, 0.04, 0.3, 10]} />
-                <meshStandardMaterial color={bidx % 2 === 0 ? '#64748B' : '#94A3B8'} roughness={0.3} />
-              </mesh>
-            ))}
-          </group>
-        ))}
-
-        {/* Double-Door Refrigerator in Fresh Slate Steel */}
         <mesh position={[4.2, 1.2, 0.1]} castShadow>
           <boxGeometry args={[1.4, 2.4, 1.0]} />
           <meshStandardMaterial color="#475569" metalness={0.7} roughness={0.3} />
         </mesh>
-        <mesh position={[3.6, 1.2, 0.65]}>
-          <boxGeometry args={[0.04, 0.8, 0.04]} />
-          <meshStandardMaterial color="#CBD5E1" metalness={0.9} />
-        </mesh>
       </group>
 
-      {/* ================= 5. CAFE DINING TABLES (SCOUT, SCRIBE, CHRONOS, RADAR CHILLING) ================= */}
-      {/* Table 1: X = 4.2, Z = 2.8 - Fresh Light Stone Top & Soft Charcoal Base */}
-      <group position={[4.2, 0, 2.8]}>
+      {/* Communal Dining Table in Central Hub */}
+      <group position={[0.0, 0, 2.5]}>
         <mesh position={[0, 0.44, 0]} castShadow>
-          <boxGeometry args={[2.2, 0.06, 1.3]} />
+          <boxGeometry args={[3.2, 0.06, 1.4]} />
           <meshStandardMaterial color="#CBD5E1" roughness={0.3} />
         </mesh>
-        <mesh position={[-0.9, 0.22, 0]}>
-          <boxGeometry args={[0.08, 0.44, 1.1]} />
+        <mesh position={[-1.3, 0.22, 0]}>
+          <boxGeometry args={[0.08, 0.44, 1.2]} />
           <meshStandardMaterial color="#2D313A" metalness={0.7} />
         </mesh>
-        <mesh position={[0.9, 0.22, 0]}>
-          <boxGeometry args={[0.08, 0.44, 1.1]} />
+        <mesh position={[1.3, 0.22, 0]}>
+          <boxGeometry args={[0.08, 0.44, 1.2]} />
           <meshStandardMaterial color="#2D313A" metalness={0.7} />
+        </mesh>
+      </group>
+    </group>
+  );
+};
+
+// ================= 3. RADAR INTEL WORKSTATION BAY (SAYAP TIMUR) =================
+export const RadarIntelWorkstations: React.FC = () => {
+  return (
+    <group>
+      {/* Central Desk Island in Sayap Timur (centered at X = 13.5, Z = 0) */}
+      <group position={[13.5, 0, 0]}>
+        {/* Row 1 Desk Slab (North Desk) */}
+        <mesh position={[0, 0.72, -0.6]} castShadow receiveShadow>
+          <boxGeometry args={[8.5, 0.06, 1.2]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.4} metalness={0.2} />
         </mesh>
 
-        {/* 4 Soft Charcoal & Slate Minimalist Chairs */}
-        {[-0.6, 0.6].map((x, i) => (
-          <group key={`dt1-n-${i}`} position={[x, 0, -0.8]}>
-            <mesh position={[0, 0.24, 0]}>
-              <boxGeometry args={[0.38, 0.48, 0.38]} />
-              <meshStandardMaterial color="#383C46" />
+        {/* Center Cyber Blue Acoustic Privacy Divider */}
+        <mesh position={[0, 0.95, 0]} castShadow>
+          <boxGeometry args={[8.5, 0.4, 0.06]} />
+          <meshStandardMaterial color="#0284C7" roughness={0.6} />
+        </mesh>
+
+        {/* Row 2 Desk Slab (South Desk) */}
+        <mesh position={[0, 0.72, 0.6]} castShadow receiveShadow>
+          <boxGeometry args={[8.5, 0.06, 1.2]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.4} metalness={0.2} />
+        </mesh>
+
+        {/* Desk Legs */}
+        {[-3.8, -1.2, 1.2, 3.8].map((x, i) => (
+          <React.Fragment key={`leg-e-${i}`}>
+            <mesh position={[x, 0.36, -1.15]}>
+              <boxGeometry args={[0.07, 0.72, 0.07]} />
+              <meshStandardMaterial color="#0F172A" metalness={0.8} />
             </mesh>
-            <mesh position={[0, 0.56, -0.16]}>
-              <boxGeometry args={[0.36, 0.28, 0.06]} />
-              <meshStandardMaterial color="#2D313A" />
+            <mesh position={[x, 0.36, 1.15]}>
+              <boxGeometry args={[0.07, 0.72, 0.07]} />
+              <meshStandardMaterial color="#0F172A" metalness={0.8} />
             </mesh>
-          </group>
-        ))}
-        {[-0.6, 0.6].map((x, i) => (
-          <group key={`dt1-s-${i}`} position={[x, 0, 0.8]} rotation={[0, Math.PI, 0]}>
-            <mesh position={[0, 0.24, 0]}>
-              <boxGeometry args={[0.38, 0.48, 0.38]} />
-              <meshStandardMaterial color="#383C46" />
-            </mesh>
-            <mesh position={[0, 0.56, -0.16]}>
-              <boxGeometry args={[0.36, 0.28, 0.06]} />
-              <meshStandardMaterial color="#2D313A" />
-            </mesh>
-          </group>
+          </React.Fragment>
         ))}
       </group>
 
-      {/* Table 2: X = 9.2, Z = 2.8 - Fresh Light Stone Top & Soft Charcoal Base */}
-      <group position={[9.2, 0, 2.8]}>
-        <mesh position={[0, 0.44, 0]} castShadow>
-          <boxGeometry args={[2.2, 0.06, 1.3]} />
-          <meshStandardMaterial color="#CBD5E1" roughness={0.3} />
-        </mesh>
-        <mesh position={[-0.9, 0.22, 0]}>
-          <boxGeometry args={[0.08, 0.44, 1.1]} />
-          <meshStandardMaterial color="#2D313A" metalness={0.7} />
-        </mesh>
-        <mesh position={[0.9, 0.22, 0]}>
-          <boxGeometry args={[0.08, 0.44, 1.1]} />
-          <meshStandardMaterial color="#2D313A" metalness={0.7} />
-        </mesh>
+      {/* ================= ROW 1 DEDICATED DESKTOPS & CHAIRS ================= */}
+      {/* CYBER SCOUT Desk: X = 12.0 */}
+      <DesktopPC position={[12.0, 0.75, -0.25]} rotation={Math.PI} agentId="scout" label="SCOUT (6 RSS)" />
+      <OfficeChair position={[12.0, 0, -1.35]} rotation={0} />
 
-        {/* 4 Soft Charcoal & Slate Minimalist Chairs */}
-        {[-0.6, 0.6].map((x, i) => (
-          <group key={`dt2-n-${i}`} position={[x, 0, -0.8]}>
-            <mesh position={[0, 0.24, 0]}>
-              <boxGeometry args={[0.38, 0.48, 0.38]} />
-              <meshStandardMaterial color="#383C46" />
-            </mesh>
-            <mesh position={[0, 0.56, -0.16]}>
-              <boxGeometry args={[0.36, 0.28, 0.06]} />
-              <meshStandardMaterial color="#2D313A" />
-            </mesh>
-          </group>
-        ))}
-        {[-0.6, 0.6].map((x, i) => (
-          <group key={`dt2-s-${i}`} position={[x, 0, 0.8]} rotation={[0, Math.PI, 0]}>
-            <mesh position={[0, 0.24, 0]}>
-              <boxGeometry args={[0.38, 0.48, 0.38]} />
-              <meshStandardMaterial color="#383C46" />
-            </mesh>
-            <mesh position={[0, 0.56, -0.16]}>
-              <boxGeometry args={[0.36, 0.28, 0.06]} />
-              <meshStandardMaterial color="#2D313A" />
-            </mesh>
-          </group>
-        ))}
-      </group>
+      {/* VERITAS FACT-CHECK Desk: X = 15.0 */}
+      <DesktopPC position={[15.0, 0.75, -0.25]} rotation={Math.PI} agentId="veritas" label="VERITAS" />
+      <OfficeChair position={[15.0, 0, -1.35]} rotation={0} />
 
-      {/* Water Dispenser Cooler near fridge - Fresh Slate & Clear */}
-      <group position={[11.2, 0, -4.2]}>
-        <mesh position={[0, 0.5, 0]}>
-          <boxGeometry args={[0.45, 1.0, 0.45]} />
-          <meshStandardMaterial color="#475569" />
-        </mesh>
-        <mesh position={[0, 1.25, 0]}>
-          <cylinderGeometry args={[0.16, 0.16, 0.4, 14]} />
-          <meshPhysicalMaterial color="#E2E8F0" transmission={0.9} transparent opacity={0.6} />
-        </mesh>
-      </group>
+      {/* ================= ROW 2 DEDICATED DESKTOPS & CHAIRS ================= */}
+      {/* TELEBOT DISPATCHER Desk: X = 12.0 */}
+      <DesktopPC position={[12.0, 0.75, 0.25]} rotation={0} agentId="telebot" label="TELEBOT" />
+      <OfficeChair position={[12.0, 0, 1.35]} rotation={Math.PI} />
+
+      {/* CIPHER AI STUDIO Desk: X = 15.0 */}
+      <DesktopPC position={[15.0, 0.75, 0.25]} rotation={0} agentId="cipher" label="CIPHER" />
+      <OfficeChair position={[15.0, 0, 1.35]} rotation={Math.PI} />
+
+      {/* ================= OSINT SERVER RACK BAY (EAST WING) ================= */}
+      <SentryServerRackBay position={[18.5, 0, -6.8]} />
     </group>
   );
 };

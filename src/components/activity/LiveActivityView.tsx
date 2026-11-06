@@ -28,7 +28,7 @@ export const LiveActivityView: React.FC = () => {
     if (isStreamPaused) return;
 
     const interval = setInterval(() => {
-      const activeAgents = ['scout', 'scribe', 'pixel', 'chronos', 'hermes', 'radar', 'sentry'] as AgentId[];
+      const activeAgents = ['scout', 'scribe', 'pixel', 'chronos', 'hermes', 'radar', 'sentry', 'veritas', 'telebot', 'cipher'] as AgentId[];
       const pickedAgentId = activeAgents[Math.floor(Math.random() * activeAgents.length)];
       const templates = SIMULATION_TEMPLATES[pickedAgentId];
       if (!templates) return;
@@ -45,7 +45,10 @@ export const LiveActivityView: React.FC = () => {
         radar: 'seo',
         sentry: 'infrastructure',
         receptionist: 'editorial',
-        chief: 'editorial'
+        chief: 'editorial',
+        veritas: 'editorial',
+        telebot: 'distribution',
+        cipher: 'editorial'
       };
 
       addActivityLog({

@@ -145,7 +145,7 @@ export const Office3DCanvas: React.FC = () => {
 
       {/* UNIFIED ARCHITECTURAL FLOATING HUD */}
       <div className="absolute top-2 left-2 right-2 sm:top-3 sm:left-4 sm:right-4 z-10 pointer-events-none flex flex-col items-center">
-        <div className="w-full max-w-5xl pointer-events-auto space-y-1.5 sm:space-y-2">
+        <div className="w-full max-w-6xl pointer-events-auto space-y-1.5 sm:space-y-2">
           {/* Incident Alert Banner if active */}
           {incidentAlert.active && (
             <div className="w-full bg-red-950/90 border border-red-500 p-1.5 px-3 flex items-center justify-between text-xs text-red-200 font-mono font-bold animate-pulse shadow-xl">
@@ -159,7 +159,7 @@ export const Office3DCanvas: React.FC = () => {
 
           {/* Row 1: Camera Preset Toolbar & Mode Switcher */}
           <div className="flex items-center justify-between gap-1.5 sm:gap-2 bg-[#262B35] border border-[#3D4454] p-1 font-mono overflow-x-auto shadow-xl">
-            {/* Camera Presets */}
+            {/* Camera Presets: Dual Wing Navigation */}
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[10px] text-slate-400 px-1.5 font-bold uppercase tracking-wider hidden md:inline">
                 VIEW:
@@ -172,21 +172,23 @@ export const Office3DCanvas: React.FC = () => {
                     ? 'bg-[#475569] text-white border-[#64748B]'
                     : 'text-slate-300 border-transparent hover:text-white hover:bg-[#313744]'
                 }`}
+                title="Lihat seluruh kantor dual-wing (Sayap Barat, Tengah, dan Sayap Timur)"
               >
                 <Compass className="w-3.5 h-3.5" />
-                <span>ISOMETRIC</span>
+                <span>SELURUH HQ</span>
               </button>
 
               <button
                 onClick={() => setCameraPreset('WORKSTATIONS')}
                 className={`px-2 py-1 text-xs font-bold rounded-none transition-colors flex items-center gap-1 border cursor-pointer shrink-0 ${
                   cameraPreset === 'WORKSTATIONS'
-                    ? 'bg-[#475569] text-white border-[#64748B]'
+                    ? 'bg-blue-900/80 text-white border-blue-500'
                     : 'text-slate-300 border-transparent hover:text-white hover:bg-[#313744]'
                 }`}
+                title="Fokus ke Sayap Barat: Meja Redaksi AdaFakta"
               >
-                <Monitor className="w-3.5 h-3.5" />
-                <span>MEJA PC</span>
+                <Monitor className="w-3.5 h-3.5 text-blue-400" />
+                <span>REDAKSI</span>
               </button>
 
               <button
@@ -196,21 +198,23 @@ export const Office3DCanvas: React.FC = () => {
                     ? 'bg-[#475569] text-white border-[#64748B]'
                     : 'text-slate-300 border-transparent hover:text-white hover:bg-[#313744]'
                 }`}
+                title="Fokus ke Area Tengah: Kedai Kopi Tarak & Lounge Santai"
               >
-                <Coffee className="w-3.5 h-3.5" />
-                <span>BREAKROOM</span>
+                <Coffee className="w-3.5 h-3.5 text-amber-400" />
+                <span>KOPI TARAK</span>
               </button>
 
               <button
                 onClick={() => setCameraPreset('SENTRY_SERVER')}
                 className={`px-2 py-1 text-xs font-bold rounded-none transition-colors flex items-center gap-1 border cursor-pointer shrink-0 ${
                   cameraPreset === 'SENTRY_SERVER'
-                    ? 'bg-[#475569] text-white border-[#64748B]'
+                    ? 'bg-emerald-950 text-white border-emerald-500'
                     : 'text-slate-300 border-transparent hover:text-white hover:bg-[#313744]'
                 }`}
+                title="Fokus ke Sayap Timur: Meja Radar Intel & Bot Jurnalis"
               >
-                <Server className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">SERVER</span>
+                <Server className="w-3.5 h-3.5 text-emerald-400" />
+                <span>RADAR BOT</span>
               </button>
             </div>
 

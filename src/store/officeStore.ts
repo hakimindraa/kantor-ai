@@ -15,7 +15,7 @@ import { PipelineArticle, PipelineStage } from '@/types/pipeline';
 import { INITIAL_AGENTS } from '@/services/mock/mockAgents';
 import { INITIAL_LOGS, SIMULATION_TEMPLATES } from '@/services/mock/mockActivities';
 import { INITIAL_ARTICLES } from '@/services/mock/mockArticles';
-import { INITIAL_OFFICE_STATS, OfficeStats } from '@/services/mock/mockAnalytics';
+import { INITIAL_OFFICE_STATS, OfficeStats, BotTeleStats, INITIAL_BOTTELE_STATS } from '@/services/mock/mockAnalytics';
 
 export type ActiveTab = 'office' | 'agents' | 'activity' | 'pipeline' | 'analytics' | 'backend' | 'settings';
 
@@ -113,6 +113,9 @@ interface OfficeState {
   // Stats
   stats: OfficeStats;
   syncLiveDbStats: (dbData: any) => void;
+  botteleStats: BotTeleStats;
+  updateBotTeleStats: (stats: Partial<BotTeleStats>) => void;
+  incrementBotTeleStat: (key: keyof Pick<BotTeleStats, 'monitoredTechCount' | 'dispatchedTelegramCount' | 'sentToAdaFaktaCount'>) => void;
 
   // UI Modals & Settings
   isBriefModalOpen: boolean;
@@ -443,6 +446,18 @@ export const useOfficeStore = create<OfficeState>((set, get) => ({
   },
 
   stats: INITIAL_OFFICE_STATS,
+  botteleStats: INITIAL_BOTTELE_STATS,
+  updateBotTeleStats: (incoming) =>
+    set((state) => ({
+      botteleStats: { ...state.botteleStats, ...incoming }
+    })),
+  incrementBotTeleStat: (key) =>
+    set((state) => ({
+      botteleStats: {
+        ...state.botteleStats,
+        [key]: (state.botteleStats[key] || 0) + 1
+      }
+    })),
   syncLiveDbStats: (dbData) => {
     if (!dbData || !dbData.connected) return;
 

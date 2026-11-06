@@ -5,7 +5,8 @@ import { OfficeFloor } from './OfficeFloor';
 import { OfficeWallsAndRooms } from './OfficeWallsAndRooms';
 import {
   OpenOfficeWorkstations,
-  BreakroomKitchenLounge
+  BreakroomKitchenLounge,
+  RadarIntelWorkstations
 } from './FurnitureSet';
 import { RobloxCharacter } from './RobloxCharacter';
 import { BaristaCharacter } from './BaristaCharacter';
@@ -124,15 +125,18 @@ export const OfficeScene: React.FC = () => {
         color={lighting.windowColor}
       />
 
-      {/* 5. INDUSTRIAL STUDIO ACCENT LIGHTS */}
-      {/* Workstation Monitors Illumination Fill */}
-      <pointLight position={[-7.0, 3.2, 0]} color={lighting.workstationLightColor} intensity={lighting.workstationLightIntensity} distance={14} />
+      {/* 5. INDUSTRIAL STUDIO ACCENT LIGHTS (DUAL-WING EXPANSION) */}
+      {/* Sayap Barat: Redaksi AdaFakta Monitors Illumination Fill */}
+      <pointLight position={[-13.5, 3.2, 0]} color={lighting.workstationLightColor} intensity={lighting.workstationLightIntensity} distance={18} />
 
-      {/* Breakroom Gallery / Kopi Tarak Illumination Fill */}
-      <pointLight position={[6.5, 3.0, -1.8]} color={lighting.breakroomLightColor} intensity={lighting.breakroomLightIntensity} distance={14} />
+      {/* Central Hub: Kopi Tarak Cafe & Lounge Illumination Fill */}
+      <pointLight position={[0.0, 3.0, -2.5]} color={lighting.breakroomLightColor} intensity={lighting.breakroomLightIntensity} distance={16} />
 
-      {/* Server Rack DevOps Clean Light */}
-      <pointLight position={[-7.0, 2.2, -6.0]} color={lighting.serverLightColor} intensity={lighting.serverLightIntensity} distance={10} />
+      {/* Sayap Timur: Radar Intel & Bot Jurnalis Cyber Illumination Fill */}
+      <pointLight position={[13.5, 3.2, 0]} color="#0284C7" intensity={lighting.workstationLightIntensity * 1.1} distance={18} />
+
+      {/* Sentry Server DevOps Clean Light */}
+      <pointLight position={[-18.5, 2.2, -6.0]} color={lighting.serverLightColor} intensity={lighting.serverLightIntensity} distance={10} />
 
       {/* ================= 1. ARCHITECTURAL FLOOR & ZONES ================= */}
       <OfficeFloor />
@@ -141,11 +145,14 @@ export const OfficeScene: React.FC = () => {
       <OfficeWallsAndRooms />
 
       {/* ================= 3. ACTIVE OFFICE FURNITURE ================= */}
-      {/* Dedicated Meja PC & DevOps Server Rack (Redaksi AI) */}
+      {/* Sayap Barat: Meja Redaksi AI AdaFakta */}
       <OpenOfficeWorkstations />
 
-      {/* Dapur & Breakroom Lounge (Tempat Nyantai saat tidak ada kerjaan) */}
+      {/* Area Tengah: Kedai Kopi Tarak & Breakroom Lounge */}
       <BreakroomKitchenLounge />
+
+      {/* Sayap Timur: Meja Radar Intelijen & Bot Jurnalis (bottelejurnalis.vercel.app) */}
+      <RadarIntelWorkstations />
 
       {/* ================= 4. ROBLOX AI AGENT AVATARS ================= */}
       {agents.map((agent) => {
@@ -162,8 +169,8 @@ export const OfficeScene: React.FC = () => {
         );
       })}
 
-      {/* ================= 4b. BARTENDER "KOPI TARAK" ================= */}
-      <BaristaCharacter position={[6.5, 0, -3.2]} rotation={0} />
+      {/* ================= 4b. BARTENDER "KOPI TARAK" (BANG TARAK) ================= */}
+      <BaristaCharacter position={[0.0, 0, -5.2]} rotation={0} />
 
       {/* ================= 5. CONTROLLERS ================= */}
       <CharacterController />
