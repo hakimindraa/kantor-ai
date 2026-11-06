@@ -15,7 +15,7 @@ import { PipelineArticle, PipelineStage } from '@/types/pipeline';
 import { INITIAL_AGENTS } from '@/services/mock/mockAgents';
 import { INITIAL_LOGS, SIMULATION_TEMPLATES } from '@/services/mock/mockActivities';
 import { INITIAL_ARTICLES } from '@/services/mock/mockArticles';
-import { INITIAL_OFFICE_STATS, OfficeStats, BotTeleStats, INITIAL_BOTTELE_STATS } from '@/services/mock/mockAnalytics';
+import { INITIAL_OFFICE_STATS, OfficeStats, BotTeleStats, INITIAL_BOTTELE_STATS, BotTeleRubricKey } from '@/services/mock/mockAnalytics';
 
 export type ActiveTab = 'office' | 'agents' | 'activity' | 'pipeline' | 'analytics' | 'backend' | 'settings';
 
@@ -116,6 +116,9 @@ interface OfficeState {
   botteleStats: BotTeleStats;
   updateBotTeleStats: (stats: Partial<BotTeleStats>) => void;
   incrementBotTeleStat: (key: keyof Pick<BotTeleStats, 'monitoredTechCount' | 'dispatchedTelegramCount' | 'sentToAdaFaktaCount'>) => void;
+  setSelectedRubric: (rubric: BotTeleRubricKey) => void;
+  toggleRadarPower247: () => void;
+  incrementRubricMetric: (rubric: BotTeleRubricKey, metric: 'monitoredCount' | 'syncedCount' | 'dispatchCount') => void;
 
   // UI Modals & Settings
   isBriefModalOpen: boolean;
@@ -458,6 +461,42 @@ export const useOfficeStore = create<OfficeState>((set, get) => ({
         [key]: (state.botteleStats[key] || 0) + 1
       }
     })),
+  setSelectedRubric: (rubric) =>
+    set((state) => ({
+      botteleStats: {
+        ...state.botteleStats,
+        selectedRubric: rubric
+      }
+    })),
+  toggleRadarPower247: () =>
+    set((state) => ({
+      botteleStats: {
+        ...state.botteleStats,
+        radarActive247: !state.botteleStats.radarActive247
+      }
+    })),
+  incrementRubricMetric: (rubric, metric) =>
+    set((state) => {
+      const currentRubrics = { ...state.botteleStats.rubrics };
+      if (currentRubrics[rubric]) {
+        currentRubrics[rubric] = {
+          ...currentRubrics[rubric],
+          [metric]: (currentRubrics[rubric][metric] || 0) + 1
+        };
+      }
+      if (currentRubrics.ALL) {
+        currentRubrics.ALL = {
+          ...currentRubrics.ALL,
+          [metric]: (currentRubrics.ALL[metric] || 0) + 1
+        };
+      }
+      return {
+        botteleStats: {
+          ...state.botteleStats,
+          rubrics: currentRubrics
+        }
+      };
+    }),
   syncLiveDbStats: (dbData) => {
     if (!dbData || !dbData.connected) return;
 

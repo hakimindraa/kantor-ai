@@ -145,9 +145,24 @@ export const SIMULATION_TEMPLATES: Record<AgentId, string[]> = {
     'Sinkronisasi 6 kanal RSS aktif: TechCrunch, The Verge, DetikINET.'
   ],
   cipher: [
-    'Riset mendalam topik AI & komputasi awan via AI Studio Redaksi.',
-    'Menganalisis tren pasar chip semikonduktor dan startup AI global.',
-    'Menyusun dossier intelijen teknologi untuk bahan draf redaktur.'
+    'Riset mendalam topik geopolitik & diplomasi global via kawat berita.',
+    'Menganalisis perkembangan hubungan internasional dan konflik Timur Tengah.',
+    'Menyusun dossier intelijen luar negeri untuk bahan meja redaksi.'
+  ],
+  gentra: [
+    'Menyisir pergerakan koalisi partai politik dan pernyataan pers pimpinan DPR.',
+    'Mendeteksi rilis survei elektabilitas dan dinamika kebijakan kementerian.',
+    'Mengklasifikasikan isu regulasi publik menjadi ringkasan faktual 3 paragraf.'
+  ],
+  gaia: [
+    'Memantau sensor kualitas udara ISPU di 34 kota besar secara realtime.',
+    'Menganalisis laporan citra satelit deforestasi hutan dan rilis Greenpeace.',
+    'Deteksi dini anomali cuaca ekstrem BMKG dan update transisi energi bersih.'
+  ],
+  artha: [
+    'Memantau ticker pergerakan indeks IHSG, nilai tukar Rupiah, dan imbal hasil obligasi.',
+    'Menyaring laporan keuangan emiten kuartal IV dan kebijakan suku bunga BI.',
+    'Menyusun ringkasan analisis sentimen pasar modal dan risiko inflasi.'
   ]
 };
 

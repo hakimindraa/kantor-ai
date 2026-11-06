@@ -128,15 +128,54 @@ const AGENT_THOUGHTS: Record<string, { work: string[]; chill: string[] }> = {
   },
   cipher: {
     work: [
-      '“Riset topik mendalam di AI Studio...”',
-      '“Sadur URL berita teknologi global...”',
-      '“Ekstraksi inti data & konseptualisasi...”',
-      '“Sintesis ringkasan eksekutif siap!”'
+      '“Riset topik mendalam kawat berita internasional...”',
+      '“Sadur berita diplomasi PBB & geopolitik global...”',
+      '“Ekstraksi inti data konflik & analisis strategis...”',
+      '“Sintesis ringkasan luar negeri siap disetor!”'
     ],
     chill: [
-      '“Riset tuntas, saatnya santai di lounge...”',
-      '“Ide riset baru muncul saat ngopi santai.”',
+      '“Analisis global tuntas, saatnya santai di lounge...”',
+      '“Kopi Tarak menemani pembacaan kawat Reuters.”',
       '“Suasana kantor AI tenang & nyaman.”'
+    ]
+  },
+  gentra: {
+    work: [
+      '“Memantau dinamika koalisi DPR & KPU...”',
+      '“Menyisir pergerakan regulasi kabinet...”',
+      '“Analisis peta kekuatan politik nasional...”',
+      '“Draf ringkasan kebijakan siap diteruskan!”'
+    ],
+    chill: [
+      '“Sidang pleno selesai, rehat sejenak di kafe...”',
+      '“Diskusi santai politik sambil ngopi robusta.”',
+      '“Kopi Tarak menenangkan pikiran analis.”'
+    ]
+  },
+  gaia: {
+    work: [
+      '“Sensor ISPU polusi udara terpantau stabil...”',
+      '“Memindai citra satelit deforestasi & cuaca BMKG...”',
+      '“Analisis laporan emisi & transisi energi hijau...”',
+      '“Peringatan dini anomali iklim dikirim ke radar!”'
+    ],
+    chill: [
+      '“Hutan aman, udara sejuk di area breakroom 🌿”',
+      '“Menyeruput teh hijau di dekat tanaman kantor.”',
+      '“Keseimbangan ekologi terjaga dengan baik.”'
+    ]
+  },
+  artha: {
+    work: [
+      '“Ticker IHSG & kurs Rupiah bergerak dinamis...”',
+      '“Memantau rilis suku bunga Bank Indonesia...”',
+      '“Kalkulasi sentimen pasar & dividen emiten...”',
+      '“Laporan kilat ekonomi makro siap terbit!”'
+    ],
+    chill: [
+      '“Pasar modal tutup sesi, saatnya santai dulu 📈”',
+      '“Ngobrol santai portofolio dengan Bang Tarak.”',
+      '“Secangkir kopi espresso hangat penyegar modal.”'
     ]
   }
 };
@@ -496,18 +535,57 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
           antenna: '#38BDF8'
         };
       case 'cipher':
-      default:
         return {
-          mainColor: '#059669',   // Emerald Tech
-          torso: '#10B981',       // Data Analyst Labcoat
-          sleeve: '#047857',
-          accent: '#A7F3D0',      // Glowing Green HUD Patch
-          tie: '#064E3B',
+          mainColor: '#8B5CF6',   // Purple/Violet Geopolitics
+          torso: '#7C3AED',       // Diplomatic Charcoal-Purple Blazer
+          sleeve: '#6D28D9',
+          accent: '#DDD6FE',      // World Map Badge
+          tie: '#4C1D95',
           legs: '#1E293B',
+          hatBase: '#6D28D9',
+          hatCrown: '#7C3AED',
+          hatRibbon: '#EDE9FE',
+          visorGlow: '#A78BFA'
+        };
+      case 'gentra':
+        return {
+          mainColor: '#E11D48',   // Deep Crimson Politics
+          torso: '#BE123C',       // Parliamentary Safari Suit
+          sleeve: '#9F1239',
+          accent: '#FFE4E6',      // Press Credential Badge
+          tie: '#881337',
+          legs: '#1E293B',
+          hatBase: '#9F1239',
+          hatCrown: '#BE123C',
+          hatRibbon: '#FECDD3',
+          glasses: '#E11D48'
+        };
+      case 'gaia':
+        return {
+          mainColor: '#10B981',   // Forest Eco Green
+          torso: '#059669',       // Ecology Field Explorer Vest
+          sleeve: '#047857',
+          accent: '#D1FAE5',      // Ecology Leaf Emblem
+          tie: '#064E3B',
+          legs: '#334155',
           hatBase: '#047857',
           hatCrown: '#059669',
-          hatRibbon: '#D1FAE5',
+          hatRibbon: '#A7F3D0',
           visorGlow: '#34D399'
+        };
+      case 'artha':
+      default:
+        return {
+          mainColor: '#F59E0B',   // Capital Gold & Navy
+          torso: '#D97706',       // Financial Analyst Pinstripe Suit
+          sleeve: '#B45309',
+          accent: '#FEF3C7',      // Stock Ticker Gold Lapel Pin
+          tie: '#92400E',
+          legs: '#0F172A',
+          hatBase: '#B45309',
+          hatCrown: '#D97706',
+          hatRibbon: '#FDE68A',
+          glasses: '#F59E0B'
         };
     }
   }, [agent.id]);

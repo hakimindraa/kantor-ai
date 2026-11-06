@@ -66,26 +66,47 @@ export async function POST(request: Request) {
     }
 
     const action = body.action || 'draft_created';
-
-    // Map default agent based on action
-    let defaultAgent = 'scribe';
-    if (action === 'article_published') defaultAgent = 'chronos';
-    else if (action === 'cover_generated') defaultAgent = 'pixel';
-    else if (action === 'fact_check' || action === 'bottele_fact_checked') defaultAgent = 'veritas';
-    else if (action === 'breaking_news' || action === 'bottele_rss_scraped') defaultAgent = 'scout';
-    else if (action === 'system_alert') defaultAgent = 'sentry';
-    else if (action === 'bottele_dispatch_telegram') defaultAgent = 'telebot';
-    else if (action === 'bottele_synced_adafakta') defaultAgent = 'veritas';
-    else if (action === 'bottele_ai_research') defaultAgent = 'cipher';
-
     const isBotteleAction = action.startsWith('bottele_');
+    const rawCategory = (body.category || '').toLowerCase();
+
+    // Map default agent based on category and action
+    let defaultAgent = 'scribe';
+    let normalizedCategory = body.category || (isBotteleAction ? 'Teknologi & AI' : 'Nasional');
+
+    if (action === 'article_published') {
+      defaultAgent = 'chronos';
+    } else if (action === 'cover_generated') {
+      defaultAgent = 'pixel';
+    } else if (action === 'bottele_dispatch_telegram') {
+      defaultAgent = 'telebot';
+    } else if (rawCategory.includes('politik') || rawCategory.includes('pemilu')) {
+      defaultAgent = 'gentra';
+      normalizedCategory = 'Politik & Pemilu';
+    } else if (rawCategory.includes('hukum') || rawCategory.includes('kriminal') || rawCategory.includes('korupsi')) {
+      defaultAgent = 'veritas';
+      normalizedCategory = 'Hukum & Kriminal';
+    } else if (rawCategory.includes('lingkungan') || rawCategory.includes('iklim') || rawCategory.includes('hutan')) {
+      defaultAgent = 'gaia';
+      normalizedCategory = 'Lingkungan & Iklim';
+    } else if (rawCategory.includes('bisnis') || rawCategory.includes('ekonomi') || rawCategory.includes('ihsg') || rawCategory.includes('pasar')) {
+      defaultAgent = 'artha';
+      normalizedCategory = 'Bisnis & Ekonomi';
+    } else if (rawCategory.includes('internasional') || rawCategory.includes('global') || rawCategory.includes('dunia')) {
+      defaultAgent = 'cipher';
+      normalizedCategory = 'Internasional';
+    } else if (rawCategory.includes('tekno') || rawCategory.includes('ai') || isBotteleAction) {
+      defaultAgent = 'scout';
+      normalizedCategory = 'Teknologi & AI';
+    } else if (action === 'system_alert') {
+      defaultAgent = 'sentry';
+    }
 
     const event: WebhookEventItem = {
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       action,
       agentId: body.agentId || defaultAgent,
-      title: body.title || (isBotteleAction ? 'Radar Intelijen Tekno Baru' : 'Update Berita Terkini AdaFakta'),
-      category: body.category || (isBotteleAction ? 'Teknologi' : 'Nasional'),
+      title: body.title || (isBotteleAction ? `Radar Intelijen [${normalizedCategory}] Baru` : 'Update Berita Terkini AdaFakta'),
+      category: normalizedCategory,
       source: body.source || (isBotteleAction ? 'Bot Tele Jurnalis Radar' : 'AdaFakta Admin Webhook'),
       coverUrl: body.coverUrl,
       contentSnippet: body.contentSnippet,

@@ -670,34 +670,27 @@ export const BreakroomKitchenLounge: React.FC = () => {
 export const RadarIntelWorkstations: React.FC = () => {
   return (
     <group>
-      {/* Central Desk Island in Sayap Timur (centered at X = 13.5, Z = 0) */}
-      <group position={[13.5, 0, 0]}>
-        {/* Row 1 Desk Slab (North Desk) */}
-        <mesh position={[0, 0.72, -0.6]} castShadow receiveShadow>
-          <boxGeometry args={[8.5, 0.06, 1.2]} />
-          <meshStandardMaterial color="#1E293B" roughness={0.4} metalness={0.2} />
+      {/* ================= CLUSTER 1: NORTH RADAR DESK (Z = -2.6) ================= */}
+      {/* 3 Workstations: SCOUT (Tekno), GENTRA (Politik), VERITAS (Hukum) */}
+      <group position={[13.5, 0, -2.6]}>
+        {/* Table Slab */}
+        <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
+          <boxGeometry args={[10.5, 0.06, 1.2]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.3} metalness={0.3} />
         </mesh>
-
-        {/* Center Cyber Blue Acoustic Privacy Divider */}
-        <mesh position={[0, 0.95, 0]} castShadow>
-          <boxGeometry args={[8.5, 0.4, 0.06]} />
-          <meshStandardMaterial color="#0284C7" roughness={0.6} />
+        {/* Acoustic Cyber Divider */}
+        <mesh position={[0, 0.95, -0.58]} castShadow>
+          <boxGeometry args={[10.5, 0.4, 0.05]} />
+          <meshStandardMaterial color="#0284C7" roughness={0.5} />
         </mesh>
-
-        {/* Row 2 Desk Slab (South Desk) */}
-        <mesh position={[0, 0.72, 0.6]} castShadow receiveShadow>
-          <boxGeometry args={[8.5, 0.06, 1.2]} />
-          <meshStandardMaterial color="#1E293B" roughness={0.4} metalness={0.2} />
-        </mesh>
-
         {/* Desk Legs */}
-        {[-3.8, -1.2, 1.2, 3.8].map((x, i) => (
-          <React.Fragment key={`leg-e-${i}`}>
-            <mesh position={[x, 0.36, -1.15]}>
+        {[-4.8, -1.6, 1.6, 4.8].map((x, i) => (
+          <React.Fragment key={`leg-n-${i}`}>
+            <mesh position={[x, 0.36, -0.5]}>
               <boxGeometry args={[0.07, 0.72, 0.07]} />
               <meshStandardMaterial color="#0F172A" metalness={0.8} />
             </mesh>
-            <mesh position={[x, 0.36, 1.15]}>
+            <mesh position={[x, 0.36, 0.5]}>
               <boxGeometry args={[0.07, 0.72, 0.07]} />
               <meshStandardMaterial color="#0F172A" metalness={0.8} />
             </mesh>
@@ -705,26 +698,100 @@ export const RadarIntelWorkstations: React.FC = () => {
         ))}
       </group>
 
-      {/* ================= ROW 1 DEDICATED DESKTOPS & CHAIRS ================= */}
-      {/* CYBER SCOUT Desk: X = 12.0 */}
-      <DesktopPC position={[12.0, 0.75, -0.25]} rotation={Math.PI} agentId="scout" label="SCOUT (6 RSS)" />
-      <OfficeChair position={[12.0, 0, -1.35]} rotation={0} />
+      {/* North Desktops & Chairs (Facing South, character sits at Z = -3.2 looking towards desk at Z = -2.6) */}
+      {/* 1. SCOUT (Tekno & AI): X = 9.5 */}
+      <DesktopPC position={[9.5, 0.75, -2.4]} rotation={Math.PI} agentId="scout" label="SCOUT [TEKNO]" />
+      <OfficeChair position={[9.5, 0, -3.2]} rotation={0} />
 
-      {/* VERITAS FACT-CHECK Desk: X = 15.0 */}
-      <DesktopPC position={[15.0, 0.75, -0.25]} rotation={Math.PI} agentId="veritas" label="VERITAS" />
-      <OfficeChair position={[15.0, 0, -1.35]} rotation={0} />
+      {/* 2. GENTRA (Politik & Pemilu): X = 13.5 */}
+      <DesktopPC position={[13.5, 0.75, -2.4]} rotation={Math.PI} agentId="gentra" label="GENTRA [POLITIK]" />
+      <OfficeChair position={[13.5, 0, -3.2]} rotation={0} />
 
-      {/* ================= ROW 2 DEDICATED DESKTOPS & CHAIRS ================= */}
-      {/* TELEBOT DISPATCHER Desk: X = 12.0 */}
-      <DesktopPC position={[12.0, 0.75, 0.25]} rotation={0} agentId="telebot" label="TELEBOT" />
-      <OfficeChair position={[12.0, 0, 1.35]} rotation={Math.PI} />
+      {/* 3. VERITAS (Hukum & Fakta): X = 17.5 */}
+      <DesktopPC position={[17.5, 0.75, -2.4]} rotation={Math.PI} agentId="veritas" label="VERITAS [HUKUM]" />
+      <OfficeChair position={[17.5, 0, -3.2]} rotation={0} />
 
-      {/* CIPHER AI STUDIO Desk: X = 15.0 */}
-      <DesktopPC position={[15.0, 0.75, 0.25]} rotation={0} agentId="cipher" label="CIPHER" />
-      <OfficeChair position={[15.0, 0, 1.35]} rotation={Math.PI} />
+      {/* ================= CLUSTER 2: SOUTH RADAR DESK (Z = 2.6) ================= */}
+      {/* 3 Workstations: GAIA (Lingkungan), ARTHA (Bisnis), CIPHER (Internasional) */}
+      <group position={[13.5, 0, 2.6]}>
+        {/* Table Slab */}
+        <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
+          <boxGeometry args={[10.5, 0.06, 1.2]} />
+          <meshStandardMaterial color="#1E293B" roughness={0.3} metalness={0.3} />
+        </mesh>
+        {/* Acoustic Cyber Divider */}
+        <mesh position={[0, 0.95, 0.58]} castShadow>
+          <boxGeometry args={[10.5, 0.4, 0.05]} />
+          <meshStandardMaterial color="#10B981" roughness={0.5} />
+        </mesh>
+        {/* Desk Legs */}
+        {[-4.8, -1.6, 1.6, 4.8].map((x, i) => (
+          <React.Fragment key={`leg-s-${i}`}>
+            <mesh position={[x, 0.36, -0.5]}>
+              <boxGeometry args={[0.07, 0.72, 0.07]} />
+              <meshStandardMaterial color="#0F172A" metalness={0.8} />
+            </mesh>
+            <mesh position={[x, 0.36, 0.5]}>
+              <boxGeometry args={[0.07, 0.72, 0.07]} />
+              <meshStandardMaterial color="#0F172A" metalness={0.8} />
+            </mesh>
+          </React.Fragment>
+        ))}
+      </group>
+
+      {/* South Desktops & Chairs (Facing North, character sits at Z = 3.2 looking towards desk at Z = 2.6) */}
+      {/* 4. GAIA (Lingkungan & Iklim): X = 9.5 */}
+      <DesktopPC position={[9.5, 0.75, 2.4]} rotation={0} agentId="gaia" label="GAIA [IKLIM]" />
+      <OfficeChair position={[9.5, 0, 3.2]} rotation={Math.PI} />
+
+      {/* 5. ARTHA (Bisnis & Ekonomi): X = 13.5 */}
+      <DesktopPC position={[13.5, 0.75, 2.4]} rotation={0} agentId="artha" label="ARTHA [BISNIS]" />
+      <OfficeChair position={[13.5, 0, 3.2]} rotation={Math.PI} />
+
+      {/* 6. CIPHER (Internasional & Geopolitik): X = 17.5 */}
+      <DesktopPC position={[17.5, 0.75, 2.4]} rotation={0} agentId="cipher" label="CIPHER [GLOBAL]" />
+      <OfficeChair position={[17.5, 0, 3.2]} rotation={Math.PI} />
+
+      {/* ================= CLUSTER 3: TELEBOT SENTRAL RADAR TRANSMISSION TOWER (X = 13.5, Z = 0) ================= */}
+      <group position={[13.5, 0, 0]}>
+        {/* Cylindrical / Octagonal Command Pedestal */}
+        <mesh position={[0, 0.36, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[1.1, 1.2, 0.72, 16]} />
+          <meshStandardMaterial color="#0F172A" roughness={0.3} metalness={0.7} />
+        </mesh>
+        {/* Luminous Orange Neon Rim */}
+        <mesh position={[0, 0.73, 0]}>
+          <cylinderGeometry args={[1.12, 1.12, 0.03, 16]} />
+          <meshBasicMaterial color="#F97316" />
+        </mesh>
+        {/* Central Telegram Transmission Antenna Mast */}
+        <mesh position={[0, 1.4, 0]} castShadow>
+          <cylinderGeometry args={[0.04, 0.06, 1.3, 8]} />
+          <meshStandardMaterial color="#334155" metalness={0.9} />
+        </mesh>
+        {/* Glowing Radar Pulse Sphere on top */}
+        <mesh position={[0, 2.1, 0]}>
+          <sphereGeometry args={[0.1, 12, 12]} />
+          <meshBasicMaterial color="#FB923C" />
+        </mesh>
+        <pointLight position={[0, 2.1, 0]} color="#F97316" intensity={1.2} distance={4} />
+
+        {/* Dual Curved Command Hologram Screens */}
+        <mesh position={[0.45, 1.05, 0.3]} rotation={[0, -0.6, 0]}>
+          <boxGeometry args={[0.6, 0.35, 0.02]} />
+          <meshBasicMaterial color="#0284C7" />
+        </mesh>
+        <mesh position={[0.45, 1.05, -0.3]} rotation={[0, 0.6, 0]}>
+          <boxGeometry args={[0.6, 0.35, 0.02]} />
+          <meshBasicMaterial color="#10B981" />
+        </mesh>
+      </group>
+
+      {/* TELEBOT Command Chair */}
+      <OfficeChair position={[12.3, 0, 0]} rotation={Math.PI / 2} />
 
       {/* ================= OSINT SERVER RACK BAY (EAST WING) ================= */}
-      <SentryServerRackBay position={[18.5, 0, -6.8]} />
+      <SentryServerRackBay position={[19.5, 0, -6.8]} />
     </group>
   );
 };

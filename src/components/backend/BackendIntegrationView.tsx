@@ -178,7 +178,8 @@ export async function notifyKantorAI(payload: {
   const handleSendTestBotteleWebhook = async (
     action: 'bottele_rss_scraped' | 'bottele_dispatch_telegram' | 'bottele_synced_adafakta',
     title: string,
-    source?: string
+    source?: string,
+    category?: string
   ) => {
     setWebhookSending(true);
     setWebhookFeedback(`Mengirim sinyal webhook Bot Tele "${action}"...`);
@@ -193,12 +194,12 @@ export async function notifyKantorAI(payload: {
           action,
           title,
           source: source || 'TechCrunch / DetikINET',
-          category: 'Teknologi'
+          category: category || 'Teknologi'
         })
       });
       const data = await res.json();
       if (res.ok) {
-        setWebhookFeedback(`✅ Sinyal Radar Bot Tele terkirim! Karakter ${data.event?.agentId?.toUpperCase()} di Sayap Timur langsung merespon.`);
+        setWebhookFeedback(`✅ Sinyal [${data.event?.category}] terkirim! Karakter ${data.event?.agentId?.toUpperCase()} di Sayap Timur langsung merespon.`);
       } else {
         setWebhookFeedback(`❌ Error: ${data.message}`);
       }
@@ -391,8 +392,9 @@ export async function notifyKantorAI(payload: {
                         onClick={() =>
                           handleSendTestBotteleWebhook(
                             'bottele_rss_scraped',
-                            'Terobosan Superkomputer AI Hemat Energi Resmi Diperkenalkan',
-                            'TechCrunch'
+                            'Nvidia & OpenAI Luncurkan Terobosan Komputasi Semikonduktor 2nm',
+                            'TechCrunch',
+                            'Teknologi'
                           )
                         }
                         disabled={webhookSending}
@@ -400,13 +402,91 @@ export async function notifyKantorAI(payload: {
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-emerald-400">1. SIMULASI RSS TEKNO (SCOUT)</span>
-                            <span className="px-1.5 py-0.2 text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
-                              ACTION: bottele_rss_scraped
+                            <span className="text-xs font-bold text-cyan-400">1. TEKNO & AI (SCOUT)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+                              RUBRIK: TEKNO
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
-                            Scout menyisir 6 kanal RSS, counter Terpantau (Tekno) bertambah +1 secara realtime.
+                            Scout menyisir 6 kanal RSS, counter Terpantau (TEKNO) bertambah realtime.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-cyan-400 transition-colors shrink-0" />
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleSendTestBotteleWebhook(
+                            'bottele_rss_scraped',
+                            'DPR & KPU Tetapkan Regulasi Baru Terkait Transparansi Pemilu',
+                            'Antara Politik',
+                            'Politik'
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-rose-400">2. POLITIK & PEMILU (GENTRA)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">
+                              RUBRIK: POLITIK
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Gentra memantau graf koalisi dan memproses isu regulasi pemerintah.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-rose-400 transition-colors shrink-0" />
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleSendTestBotteleWebhook(
+                            'bottele_rss_scraped',
+                            'KPK Amankan Aset Rp 320 Miliar dalam Penyelidikan Tipikor',
+                            'Siaran Pers KPK',
+                            'Hukum'
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-blue-400">3. HUKUM & FAKTA (VERITAS)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold">
+                              RUBRIK: HUKUM
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Veritas memverifikasi silang berkas perkara dan saring hoaks.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-blue-400 transition-colors shrink-0" />
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleSendTestBotteleWebhook(
+                            'bottele_rss_scraped',
+                            'BMKG Rilis Pantauan Sensor ISPU Kualitas Udara & Titik Api Hutan',
+                            'Greenpeace ID',
+                            'Lingkungan'
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-emerald-400">4. LINGKUNGAN & IKLIM (GAIA)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                              RUBRIK: LINGKUNGAN
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Gaia membaca sensor satelit dan laporan iklim energi bersih.
                           </p>
                         </div>
                         <Zap className="w-4 h-4 text-neutral-500 group-hover:text-emerald-400 transition-colors shrink-0" />
@@ -415,8 +495,10 @@ export async function notifyKantorAI(payload: {
                       <button
                         onClick={() =>
                           handleSendTestBotteleWebhook(
-                            'bottele_dispatch_telegram',
-                            'Breaking Alert: Pendanaan Startup AI Naik Drastis di Kuartal IV'
+                            'bottele_rss_scraped',
+                            'IHSG Ditutup Menguat Tajam Menembus Level Psikologis Baru',
+                            'Bisnis.com',
+                            'Bisnis'
                           )
                         }
                         disabled={webhookSending}
@@ -424,23 +506,25 @@ export async function notifyKantorAI(payload: {
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-sky-400">2. SIMULASI DISPATCH TELEGRAM (TELEBOT)</span>
-                            <span className="px-1.5 py-0.2 text-[9px] bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">
-                              ACTION: bottele_dispatch_telegram
+                            <span className="text-xs font-bold text-amber-400">5. BISNIS & EKONOMI (ARTHA)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
+                              RUBRIK: BISNIS
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
-                            TeleBot memproses pesan peringatan liputan ke smartphone jurnalis di lapangan.
+                            Artha mengkaji ticker bursa, dividen emiten, dan stabilitas kurs rupiah.
                           </p>
                         </div>
-                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-sky-400 transition-colors shrink-0" />
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-amber-400 transition-colors shrink-0" />
                       </button>
 
                       <button
                         onClick={() =>
                           handleSendTestBotteleWebhook(
-                            'bottele_synced_adafakta',
-                            'Dossier Investigasi: Keamanan Privasi Data Biometrik Terverifikasi'
+                            'bottele_rss_scraped',
+                            'KTT Diplomasi Global Sepakati Deklarasi Keamanan Wilayah',
+                            'Reuters World',
+                            'Internasional'
                           )
                         }
                         disabled={webhookSending}
@@ -448,16 +532,42 @@ export async function notifyKantorAI(payload: {
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-purple-400">3. SIMULASI SETOR KE ADAFAKTA (VERITAS)</span>
+                            <span className="text-xs font-bold text-purple-400">6. INTERNASIONAL (CIPHER)</span>
                             <span className="px-1.5 py-0.2 text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold">
-                              ACTION: bottele_synced_adafakta
+                              RUBRIK: INTERNASIONAL
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
-                            Veritas memverifikasi fakta dan menyetor materi investigasi ke Sayap Barat AdaFakta.
+                            Cipher menyadur kawat berita mancanegara dan membedah dinamika geopolitik.
                           </p>
                         </div>
                         <Zap className="w-4 h-4 text-neutral-500 group-hover:text-purple-400 transition-colors shrink-0" />
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleSendTestBotteleWebhook(
+                            'bottele_dispatch_telegram',
+                            'Breaking Alert: Transmisi Berita Darurat Terkirim ke Telegram',
+                            'Telegram Dispatcher',
+                            'Teknologi'
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-orange-400">7. TELEGRAM DISPATCH (TELEBOT)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-orange-500/20 text-orange-300 border border-orange-500/40 font-bold">
+                              ACTION: bottele_dispatch_telegram
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            TeleBot menembakkan notifikasi peringatan darurat ke saluran Telegram redaksi.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-orange-400 transition-colors shrink-0" />
                       </button>
                     </>
                   )}

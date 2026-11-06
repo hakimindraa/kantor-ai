@@ -2,6 +2,7 @@
 import { useOfficeStore } from '@/store/officeStore';
 import { HologramEvent, OfficeIncident, RemoteActionType } from '@/types/office';
 import { AgentId } from '@/types/agent';
+import { BotTeleRubricKey } from '@/services/mock/mockAnalytics';
 import { soundManager } from '@/services/audio/soundManager';
 
 class EventBridge {
@@ -297,33 +298,44 @@ class EventBridge {
 
     // 2. Specialized handling for Bot Tele Jurnalis Radar vs AdaFakta Redaksi
     if (isBotteleAction) {
+      const catLower = (event.category || '').toLowerCase();
+      let rubricKey: BotTeleRubricKey = 'TEKNO';
+      if (catLower.includes('politik') || catLower.includes('pemilu')) rubricKey = 'POLITIK';
+      else if (catLower.includes('hukum') || catLower.includes('kriminal') || catLower.includes('korupsi')) rubricKey = 'HUKUM';
+      else if (catLower.includes('lingkungan') || catLower.includes('iklim') || catLower.includes('hutan')) rubricKey = 'LINGKUNGAN';
+      else if (catLower.includes('bisnis') || catLower.includes('ekonomi') || catLower.includes('ihsg') || catLower.includes('pasar')) rubricKey = 'BISNIS';
+      else if (catLower.includes('internasional') || catLower.includes('global') || catLower.includes('dunia')) rubricKey = 'INTERNASIONAL';
+
       if (event.action === 'bottele_rss_scraped') {
+        store.incrementRubricMetric(rubricKey, 'monitoredCount');
         store.incrementBotTeleStat('monitoredTechCount');
         soundManager.playKeyboardClick();
         this.dispatchHologram({
           agentId: targetAgentId,
           type: 'RSS_BREAKING',
-          title: '📡 6 RSS TECH SCOUTED',
-          subtitle: `${event.source || 'Radar Tekno'}: ${event.title.substring(0, 36)}`,
+          title: `📡 [${rubricKey}] RSS SCOUTED`,
+          subtitle: `${event.source || 'Radar'}: ${event.title.substring(0, 36)}`,
           timestamp: Date.now()
         });
       } else if (event.action === 'bottele_dispatch_telegram') {
+        store.incrementRubricMetric(rubricKey, 'dispatchCount');
         store.incrementBotTeleStat('dispatchedTelegramCount');
         soundManager.playTelegramPing();
         this.dispatchHologram({
           agentId: targetAgentId,
           type: 'TELEGRAM_ALERT',
-          title: '📱 BOT TELEGRAM DISPATCH',
+          title: `📱 [${rubricKey}] TELEGRAM DISPATCH`,
           subtitle: event.title.substring(0, 38),
           timestamp: Date.now()
         });
       } else if (event.action === 'bottele_synced_adafakta') {
+        store.incrementRubricMetric(rubricKey, 'syncedCount');
         store.incrementBotTeleStat('sentToAdaFaktaCount');
         soundManager.playPublishChime();
         this.dispatchHologram({
           agentId: targetAgentId,
           type: 'SEO_PING',
-          title: '🛡️ DISETOR KE REDAKSI',
+          title: `🛡️ [${rubricKey}] DISETOR KE REDAKSI`,
           subtitle: event.title.substring(0, 38),
           timestamp: Date.now()
         });
@@ -332,7 +344,7 @@ class EventBridge {
         this.dispatchHologram({
           agentId: targetAgentId,
           type: 'GEMINI_DRAFT',
-          title: `📡 RADAR: ${event.action.replace('bottele_', '').toUpperCase()}`,
+          title: `📡 RADAR [${rubricKey}]: ${event.action.replace('bottele_', '').toUpperCase()}`,
           subtitle: event.title.substring(0, 42),
           timestamp: Date.now()
         });
@@ -345,7 +357,7 @@ class EventBridge {
         agentColor: '#10B981',
         category: 'fetch',
         level: 'success',
-        message: `[RADAR BOT TELE] ${targetAgentId.toUpperCase()} menerima event ${event.action}: "${event.title.substring(0, 42)}..."`
+        message: `[RADAR BOT TELE] ${targetAgentId.toUpperCase()} memproses [${rubricKey}]: "${event.title.substring(0, 42)}..."`
       });
       return;
     }

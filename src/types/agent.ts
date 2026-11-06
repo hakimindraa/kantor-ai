@@ -10,7 +10,10 @@ export type AgentId =
   | 'chief'
   | 'veritas'
   | 'telebot'
-  | 'cipher';
+  | 'cipher'
+  | 'gentra'
+  | 'gaia'
+  | 'artha';
 
 export type AgentStatus = 'working' | 'idle' | 'active' | 'paused';
 

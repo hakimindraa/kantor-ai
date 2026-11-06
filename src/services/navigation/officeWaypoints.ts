@@ -79,38 +79,62 @@ export const DESK_WAYPOINTS: Record<AgentId, OfficeWaypoint> = {
     agentId: 'receptionist'
   },
 
-  // Divisi Radar Intelijen & Bot Jurnalis (Sayap Timur)
+  // Divisi Radar Intelijen & Bot Jurnalis (Sayap Timur - 7 Analis Rubrik)
   scout: {
     id: 'desk-scout',
-    name: 'Meja Cyber Scout (6 RSS)',
-    position: [12.0, 0, -2.5],
-    rotation: 0,
+    name: 'Meja Scout (Tekno & AI)',
+    position: [9.5, 0, -3.2],
+    rotation: Math.PI,
     type: 'desk',
     agentId: 'scout'
   },
+  gentra: {
+    id: 'desk-gentra',
+    name: 'Meja Gentra (Politik & Pemilu)',
+    position: [13.5, 0, -3.2],
+    rotation: Math.PI,
+    type: 'desk',
+    agentId: 'gentra'
+  },
   veritas: {
     id: 'desk-veritas',
-    name: 'Meja Veritas Fact-Check',
-    position: [15.0, 0, -2.5],
-    rotation: 0,
+    name: 'Meja Veritas (Hukum & Fakta)',
+    position: [17.5, 0, -3.2],
+    rotation: Math.PI,
     type: 'desk',
     agentId: 'veritas'
   },
-  telebot: {
-    id: 'desk-telebot',
-    name: 'Meja TeleBot Dispatcher',
-    position: [12.0, 0, 2.5],
-    rotation: Math.PI,
+  gaia: {
+    id: 'desk-gaia',
+    name: 'Meja Gaia (Lingkungan & Iklim)',
+    position: [9.5, 0, 3.2],
+    rotation: 0,
     type: 'desk',
-    agentId: 'telebot'
+    agentId: 'gaia'
+  },
+  artha: {
+    id: 'desk-artha',
+    name: 'Meja Artha (Bisnis & Ekonomi)',
+    position: [13.5, 0, 3.2],
+    rotation: 0,
+    type: 'desk',
+    agentId: 'artha'
   },
   cipher: {
     id: 'desk-cipher',
-    name: 'Meja Cipher AI Studio',
-    position: [15.0, 0, 2.5],
-    rotation: Math.PI,
+    name: 'Meja Cipher (Internasional)',
+    position: [17.5, 0, 3.2],
+    rotation: 0,
     type: 'desk',
     agentId: 'cipher'
+  },
+  telebot: {
+    id: 'desk-telebot',
+    name: 'Konsol Sentral TeleBot Dispatcher',
+    position: [13.5, 0, 0.0],
+    rotation: Math.PI / 2,
+    type: 'desk',
+    agentId: 'telebot'
   }
 };
 

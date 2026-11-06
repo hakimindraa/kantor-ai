@@ -30,21 +30,139 @@ export const INITIAL_OFFICE_STATS: OfficeStats = {
   indexingSuccessRate: 100
 };
 
+import { AgentId } from '@/types/agent';
+
+export type BotTeleRubricKey = 'ALL' | 'TEKNO' | 'POLITIK' | 'HUKUM' | 'LINGKUNGAN' | 'BISNIS' | 'INTERNASIONAL';
+
+export interface RubricMetric {
+  key: BotTeleRubricKey;
+  label: string;
+  iconName: string;
+  assignedAgentId: AgentId;
+  agentName: string;
+  color: string;
+  monitoredCount: number;
+  syncedCount: number;
+  dispatchCount: number;
+  rssCount: number;
+  feeds: string[];
+}
+
 export interface BotTeleStats {
+  selectedRubric: BotTeleRubricKey;
+  radarActive247: boolean;
+  freshnessWindow: string;
   activeRssCount: number;
   monitoredTechCount: number;
   dispatchedTelegramCount: number;
   sentToAdaFaktaCount: number;
   lastScrapedSource?: string;
   isScrapingActive?: boolean;
+  rubrics: Record<BotTeleRubricKey, RubricMetric>;
 }
 
 export const INITIAL_BOTTELE_STATS: BotTeleStats = {
+  selectedRubric: 'ALL',
+  radarActive247: true,
+  freshnessWindow: '30 Menit (Bertahap)',
   activeRssCount: 6,
   monitoredTechCount: 0,
   dispatchedTelegramCount: 0,
   sentToAdaFaktaCount: 0,
-  lastScrapedSource: 'TechCrunch'
+  lastScrapedSource: 'TechCrunch',
+  rubrics: {
+    ALL: {
+      key: 'ALL',
+      label: 'Semua Liputan',
+      iconName: 'Globe',
+      assignedAgentId: 'telebot',
+      agentName: 'TELEBOT',
+      color: '#F97316',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 6,
+      feeds: ['TechCrunch', 'The Verge', 'DetikINET', 'Antara Tekno', 'DailySocial', 'Google News Tekno ID']
+    },
+    TEKNO: {
+      key: 'TEKNO',
+      label: 'Teknologi & AI',
+      iconName: 'Cpu',
+      assignedAgentId: 'scout',
+      agentName: 'SCOUT',
+      color: '#00F0FF',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 6,
+      feeds: ['TechCrunch', 'The Verge', 'DetikINET', 'Antara Tekno', 'DailySocial', 'Google News Tekno ID']
+    },
+    POLITIK: {
+      key: 'POLITIK',
+      label: 'Politik & Pemilu',
+      iconName: 'Landmark',
+      assignedAgentId: 'gentra',
+      agentName: 'GENTRA',
+      color: '#E11D48',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 5,
+      feeds: ['Antara Politik', 'Detik News Pemilu', 'Tempo Politik', 'CNN Indonesia Politik', 'KPU Media Center']
+    },
+    HUKUM: {
+      key: 'HUKUM',
+      label: 'Hukum & Kriminal',
+      iconName: 'Scale',
+      assignedAgentId: 'veritas',
+      agentName: 'VERITAS',
+      color: '#3B82F6',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 4,
+      feeds: ['Siaran Pers KPK', 'Hukumonline', 'Kejaksaan RI Feed', 'Mahkamah Agung News']
+    },
+    LINGKUNGAN: {
+      key: 'LINGKUNGAN',
+      label: 'Lingkungan & Iklim',
+      iconName: 'Trees',
+      assignedAgentId: 'gaia',
+      agentName: 'GAIA',
+      color: '#10B981',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 4,
+      feeds: ['Greenpeace ID', 'BMKG Cuaca & Iklim', 'Walhi Nasional', 'Mongabay Indonesia']
+    },
+    BISNIS: {
+      key: 'BISNIS',
+      label: 'Bisnis & Ekonomi',
+      iconName: 'TrendingUp',
+      assignedAgentId: 'artha',
+      agentName: 'ARTHA',
+      color: '#F59E0B',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 5,
+      feeds: ['Bisnis.com', 'CNBC Indonesia', 'Kontan Pasar Modal', 'Bloomberg Technoz', 'Bank Indonesia Rilis']
+    },
+    INTERNASIONAL: {
+      key: 'INTERNASIONAL',
+      label: 'Internasional',
+      iconName: 'Compass',
+      assignedAgentId: 'cipher',
+      agentName: 'CIPHER',
+      color: '#8B5CF6',
+      monitoredCount: 0,
+      syncedCount: 0,
+      dispatchCount: 0,
+      rssCount: 4,
+      feeds: ['Reuters World', 'BBC News Asia', 'Al Jazeera English', 'AFP News']
+    }
+  }
 };
 
 export const HOURLY_ARTICLES_DATA = [
