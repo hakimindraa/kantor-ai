@@ -9,15 +9,15 @@ import { useOfficeStore } from '@/store/officeStore';
 import { CameraPreset } from '@/types/office';
 
 const PRESET_COORDINATES: Record<CameraPreset, { pos: [number, number, number]; target: [number, number, number] }> = {
-  ISOMETRIC: { pos: [24, 24, 24], target: [0, 1.0, 0] },
-  OVERVIEW: { pos: [0, 32, 16], target: [0, 0, 0] },
-  WORKSTATIONS: { pos: [-13.5, 9.5, 9.5], target: [-13.5, 1.0, 0] }, // Sayap Barat Redaksi AdaFakta
-  STUDIO_FOTO: { pos: [0.0, 9.0, 9.0], target: [0.0, 1.0, -1.0] }, // Kopi Tarak Hub
-  RUANG_RAPAT: { pos: [-13.5, 9.5, 9.5], target: [-13.5, 1.0, 0] },
-  PEMIMPIN_REDAKSI: { pos: [-18.5, 6.0, 4.0], target: [-18.5, 1.0, 0] },
-  SENTRY_SERVER: { pos: [13.5, 9.5, 9.5], target: [13.5, 1.0, 0] }, // Sayap Timur Radar Intelijen
-  RECEPTION: { pos: [0.0, 6.5, 9.5], target: [0.0, 1.0, 4.5] },
-  LOUNGE: { pos: [0.0, 8.5, 9.0], target: [0.0, 1.0, 1.5] },
+  ISOMETRIC: { pos: [18.0, 24.0, 24.0], target: [-6.25, 1.0, 0.0] },
+  OVERVIEW: { pos: [-6.25, 30.0, 20.0], target: [-6.25, 0.5, 0.0] }, // Full 3-Zone Diorama View (Barat, Kopi Tarak, Timur)
+  WORKSTATIONS: { pos: [-18.5, 16.0, 14.0], target: [-18.5, 1.0, 0] }, // Kantor Barat Redaksi AdaFakta (6 Ruangan)
+  STUDIO_FOTO: { pos: [-18.5, 7.5, -2.5], target: [-18.5, 1.0, -7.5] }, // Ruang 02 Studio Foto & Pixel
+  RUANG_RAPAT: { pos: [-18.5, 12.0, 10.0], target: [-18.5, 1.0, 0] },
+  PEMIMPIN_REDAKSI: { pos: [-18.5, 6.5, 4.5], target: [-18.5, 1.0, 0.4] }, // Podium Publikasi Scribe & Panggung Redaksi
+  SENTRY_SERVER: { pos: [10.5, 12.0, 11.0], target: [10.5, 1.0, 0.0] }, // Kantor Timur (Radar Intelijen & TeleBot)
+  RECEPTION: { pos: [-1.5, 9.0, 9.5], target: [-1.5, 1.0, 0.0] }, // Gerbang Pintu Kaca & Central Hub
+  LOUNGE: { pos: [-1.5, 8.0, 2.5], target: [-1.5, 1.0, -5.0] }, // Central Hub: Kedai Kopi Tarak & Barista Bang Tarak
   FOCUS_AGENT: { pos: [0, 6, 6], target: [0, 1, 0] }
 };
 
@@ -75,7 +75,7 @@ export const CameraController: React.FC = () => {
 
       // deltaZoom > 0 means zoom in (closer), deltaZoom < 0 means zoom out (further)
       const factor = deltaZoom > 0 ? 0.85 : 1.18;
-      const newDist = THREE.MathUtils.clamp(currentDist * factor, 2.5, 60);
+      const newDist = THREE.MathUtils.clamp(currentDist * factor, 2.5, 85);
 
       offset.setLength(newDist);
       camera.position.copy(target).add(offset);
@@ -242,7 +242,7 @@ export const CameraController: React.FC = () => {
       dampingFactor={0.08}
       maxPolarAngle={Math.PI / 2.1}
       minDistance={2.5}
-      maxDistance={60}
+      maxDistance={85}
       zoomSpeed={1.3}
       rotateSpeed={0.8}
       panSpeed={1.2}

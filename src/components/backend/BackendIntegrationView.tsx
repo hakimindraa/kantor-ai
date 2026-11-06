@@ -67,8 +67,16 @@ export const BackendIntegrationView: React.FC = () => {
   };
 
   const handleSendTestWebhook = async (
-    action: 'draft_created' | 'article_published' | 'cover_generated',
-    title: string
+    action:
+      | 'draft_created'
+      | 'cover_generated'
+      | 'article_published'
+      | 'article_rewritten'
+      | 'ai_studio_generated'
+      | 'author_created'
+      | 'db_purged',
+    title: string,
+    extra?: { source?: string; author?: string; model?: string; category?: string }
   ) => {
     setWebhookSending(true);
     setWebhookFeedback(`Mengirim sinyal webhook "${action}"...`);
@@ -82,16 +90,17 @@ export const BackendIntegrationView: React.FC = () => {
         body: JSON.stringify({
           action,
           title,
-          category: action === 'cover_generated' ? 'Multimedia' : 'Nasional',
-          source: 'AdaFakta Admin Webhook Simulator',
-          agentId: action === 'draft_created' ? 'scribe' : action === 'cover_generated' ? 'pixel' : 'chronos'
+          category: extra?.category || (action === 'cover_generated' ? 'Multimedia' : 'Nasional'),
+          source: extra?.source || 'AdaFakta Admin Webhook Simulator',
+          author: extra?.author,
+          model: extra?.model
         })
       });
       const data = await res.json();
       if (res.ok) {
-        setWebhookFeedback(`✅ Sinyal Webhook terkirim! 3D Diorama & Kanban langsung merespon (${data.event?.agentId?.toUpperCase()}).`);
+        setWebhookFeedback(`✅ Sinyal Webhook "${action}" terkirim! 3D Diorama & Karakter merespon (${data.event?.agentId?.toUpperCase()}).`);
       } else {
-        setWebhookFeedback(`❌ Error: ${data.message}`);
+        setWebhookFeedback(`❌ Error: ${data.message || data.error}`);
       }
     } catch (err: any) {
       setWebhookFeedback(`❌ Gagal: ${err.message}`);
@@ -102,14 +111,25 @@ export const BackendIntegrationView: React.FC = () => {
 
   const snippetCode = `// lib/kantorAiNotifier.ts (Copy ke proyek Web Admin AdaFakta Anda)
 export async function notifyKantorAI(payload: {
-  action: 'draft_created' | 'article_published' | 'cover_generated';
+  action:
+    | 'draft_created'
+    | 'cover_generated'
+    | 'article_published'
+    | 'article_rewritten'
+    | 'ai_studio_generated'
+    | 'author_created'
+    | 'db_purged';
   title: string;
   category?: string;
   coverUrl?: string;
+  articleUrl?: string;
+  author?: string;
+  source?: string;
+  model?: string;
 }) {
   try {
     const endpoint = process.env.KANTORAI_URL || 'https://aikantoradafakta.vercel.app';
-    const secret = process.env.KANTORAI_WEBHOOK_SECRET || 'jsfhohoijmOIOIIUOJlknf894560257yrhuehflh884750wuehflhfehUYUYUHIhr4764357847eieohdlskfreoyt8373940';
+    const secret = process.env.KANTORAI_WEBHOOK_SECRET || 'kantorai_secret_super_aman_2026';
 
     // Timeout 1.5 detik non-blocking (tidak akan pernah membebani web AdaFakta)
     const controller = new AbortController();
@@ -129,7 +149,7 @@ export async function notifyKantorAI(payload: {
   } catch {
     // Non-blocking, zero crash guarantee
   }
-}`;
+};`;
 
   const botteleSnippetCode = `// lib/kantorAiNotifier.ts (Copy ke proyek Web Bot Tele Jurnalis Anda)
 export async function notifyKantorAI(payload: {
@@ -314,76 +334,186 @@ export async function notifyKantorAI(payload: {
                 <div className="mt-4 space-y-2.5">
                   {webhookTarget === 'adafakta' ? (
                     <>
+                      {/* 1. SCOUT (BARAT) - DRAFT CREATED */}
                       <button
                         onClick={() =>
                           handleSendTestWebhook(
                             'draft_created',
-                            'Kecerdasan Buatan Nasional Catat Lonjakan Efisiensi di Sektor Publik'
+                            'Kecerdasan Buatan Nasional Catat Lonjakan Efisiensi di Sektor Publik',
+                            { source: 'Portal Media Antara', category: 'Teknologi & AI' }
                           )
                         }
                         disabled={webhookSending}
-                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-sky-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white">1. SIMULASI DRAFT BARU (SCRIBE)</span>
-                            <span className="px-1.5 py-0.2 text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold">
+                            <span className="text-xs font-bold text-white">1. 🕵️‍♂️ DRAF BARU MASUK (SCOUT BARAT)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">
                               ACTION: draft_created
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
-                            Scribe berdiri dari breakroom, berjalan ke meja kerja & mulai mengetik naskah.
+                            Scout Barat menyambut incoming RSS, radar berkedip cepat & sinyal draf masuk.
                           </p>
                         </div>
-                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-amber-400 transition-colors shrink-0" />
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-sky-400 transition-colors shrink-0" />
                       </button>
 
+                      {/* 2. PIXEL - COVER GENERATED */}
                       <button
                         onClick={() =>
                           handleSendTestWebhook(
                             'cover_generated',
-                            'Infografis: Peta Transformasi Teknologi AI Indonesia 2026'
+                            'Infografis: Peta Transformasi Teknologi AI Indonesia 2026',
+                            { source: 'Studio Desain Redaksi' }
                           )
                         }
                         disabled={webhookSending}
-                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-rose-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white">2. SIMULASI COVER PROSES (PIXEL)</span>
-                            <span className="px-1.5 py-0.2 text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold">
+                            <span className="text-xs font-bold text-white">2. 📸 FOTO SAMPUL IMGBB (PIXEL)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">
                               ACTION: cover_generated
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
-                            Pixel mengompresi gambar cover ke format WebP & menyinkronkan aset visual.
+                            Pixel memotret, lampu blitz kamera menyala putih sesaat & upload WebP ke CDN.
                           </p>
                         </div>
-                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-purple-400 transition-colors shrink-0" />
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-rose-400 transition-colors shrink-0" />
                       </button>
 
+                      {/* 3. SCRIBE - ARTICLE PUBLISHED */}
                       <button
                         onClick={() =>
                           handleSendTestWebhook(
                             'article_published',
-                            'RESMI DITERBITKAN: Indonesia Luncurkan Inisiatif AI Berkelanjutan'
+                            'RESMI DITERBITKAN: Indonesia Luncurkan Inisiatif AI Berkelanjutan',
+                            { source: 'Meja Redaksi AdaFakta', category: 'Nasional' }
                           )
                         }
                         disabled={webhookSending}
-                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-white text-left transition-colors flex items-center justify-between cursor-pointer group"
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-emerald-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white">3. SIMULASI TERBIT LIVE (CHRONOS & RADAR)</span>
+                            <span className="text-xs font-bold text-white">3. 🎉 RESMI TAYANG & SELEBRASI (REDAKSI)</span>
                             <span className="px-1.5 py-0.2 text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
                               ACTION: article_published
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
-                            Suara denting chime berbunyi, konfeti meletup, dan artikel muncul di kolom Published.
+                            Agent Redaksi bersorak di podium panggung tengah, ledakan konfeti meletup!
                           </p>
                         </div>
                         <Zap className="w-4 h-4 text-neutral-500 group-hover:text-emerald-400 transition-colors shrink-0" />
+                      </button>
+
+                      {/* 4. SADUR - ARTICLE REWRITTEN */}
+                      <button
+                        onClick={() =>
+                          handleSendTestWebhook(
+                            'article_rewritten',
+                            'Menyadur Analisis Strategis Semikonduktor Global dari Kawat Internasional',
+                            { source: 'Reuters & Bloomberg', category: 'Internasional' }
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-purple-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">4. 🔗 SADUR BERITA URL (AGENT SADUR)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold">
+                              ACTION: article_rewritten
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Agent Sadur membuka lembaran koran & menyadur dokumen luar menjadi naskah berimbang.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-purple-400 transition-colors shrink-0" />
+                      </button>
+
+                      {/* 5. NOVA - AI STUDIO GENERATED */}
+                      <button
+                        onClick={() =>
+                          handleSendTestWebhook(
+                            'ai_studio_generated',
+                            'Eksplorasi Investigatif Multi-Model: Masa Depan Ketahanan Siber Nasional',
+                            { model: 'Gemini 3.8 Flash', category: 'Teknologi' }
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-pink-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">5. 🪄 AI STUDIO EXPERT (AGENT NOVA)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-pink-500/20 text-pink-300 border border-pink-500/40 font-bold">
+                              ACTION: ai_studio_generated
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Agent Nova menyalakan tabung silinder hologram & meracik naskah komparatif mutakhir.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-pink-400 transition-colors shrink-0" />
+                      </button>
+
+                      {/* 6. HRD - AUTHOR CREATED */}
+                      <button
+                        onClick={() =>
+                          handleSendTestWebhook(
+                            'author_created',
+                            'Pendaftaran Kontributor & Wartawan Investigasi Baru Redaksi',
+                            { author: 'Budi Santoso, S.I.Kom', category: 'Redaksi' }
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-blue-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">6. 👥 ONBOARDING PENULIS BARU (HRD)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold">
+                              ACTION: author_created
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Agent HRD merapikan papan struktur tim & melambaikan tangan menyambut wartawan baru.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-blue-400 transition-colors shrink-0" />
+                      </button>
+
+                      {/* 7. ROBO-SWEEP - DB PURGED */}
+                      <button
+                        onClick={() =>
+                          handleSendTestWebhook(
+                            'db_purged',
+                            'Pembersihan Cache Basi & Optimasi Database Server Neon Postgres',
+                            { category: 'Infrastruktur' }
+                          )
+                        }
+                        disabled={webhookSending}
+                        className="w-full p-2.5 bg-[#181818] hover:bg-[#222222] border border-[#333333] hover:border-amber-400 text-left transition-colors flex items-center justify-between cursor-pointer group"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">7. 🧹 BERSIH DATABASE (ROBO-SWEEP)</span>
+                            <span className="px-1.5 py-0.2 text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
+                              ACTION: db_purged
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 mt-0.5 font-sans">
+                            Robo-Sweep meluncur dari stasiun docking charger menyedot cache basi ruang server.
+                          </p>
+                        </div>
+                        <Zap className="w-4 h-4 text-neutral-500 group-hover:text-amber-400 transition-colors shrink-0" />
                       </button>
                     </>
                   ) : (

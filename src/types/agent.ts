@@ -13,7 +13,12 @@ export type AgentId =
   | 'cipher'
   | 'gentra'
   | 'gaia'
-  | 'artha';
+  | 'artha'
+  | 'sadur'
+  | 'nova'
+  | 'hrd'
+  | 'robosweep'
+  | 'scout_west';
 
 export type AgentStatus = 'working' | 'idle' | 'active' | 'paused';
 

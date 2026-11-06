@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useOfficeStore } from '@/store/officeStore';
+import { resolveCharacterCollision } from '@/services/physics/officeCollision';
 
 interface KeyState {
   forward: boolean;
@@ -107,18 +108,21 @@ export const CharacterController: React.FC = () => {
       moveZ /= length;
 
       const speed = 7.5 * delta;
-      let nextX = posRef.current[0] + moveX * speed;
-      let nextZ = posRef.current[2] + moveZ * speed;
+      const desiredX = posRef.current[0] + moveX * speed;
+      const desiredZ = posRef.current[2] + moveZ * speed;
 
-      // Office boundaries for 28x16 diorama floor
-      nextX = Math.max(-12.8, Math.min(12.8, nextX));
-      nextZ = Math.max(-6.8, Math.min(6.8, nextZ));
+      // Real-time 3D collision resolution against walls, glass partitions, desks, tables, and chairs
+      const [resolvedX, , resolvedZ] = resolveCharacterCollision(
+        posRef.current,
+        [desiredX, 0, desiredZ],
+        0.32
+      );
 
-      // Calculate facing angle
+      // Calculate facing angle based on input direction
       const targetAngle = Math.atan2(moveX, moveZ);
       rotRef.current = targetAngle;
 
-      posRef.current = [nextX, 0, nextZ];
+      posRef.current = [resolvedX, 0, resolvedZ];
       setPlayerTransform(posRef.current, rotRef.current);
     }
   });

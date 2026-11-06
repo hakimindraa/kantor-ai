@@ -288,10 +288,25 @@ class EventBridge {
     source?: string;
     coverUrl?: string;
     contentSnippet?: string;
+    author?: string;
+    model?: string;
   }) {
     const store = useOfficeStore.getState();
     const isBotteleAction = event.action.startsWith('bottele_');
-    const targetAgentId: AgentId = (event.agentId as AgentId) || (isBotteleAction ? 'scout' : 'scribe');
+    
+    // Resolve target agent correctly for both West Wing (AdaFakta) and East Wing (Bot Tele)
+    let targetAgentId: AgentId = (event.agentId as AgentId);
+    if (!targetAgentId) {
+      if (event.action === 'draft_created') targetAgentId = 'scout_west';
+      else if (event.action === 'cover_generated') targetAgentId = 'pixel';
+      else if (event.action === 'article_published') targetAgentId = 'scribe';
+      else if (event.action === 'article_rewritten') targetAgentId = 'sadur';
+      else if (event.action === 'ai_studio_generated') targetAgentId = 'nova';
+      else if (event.action === 'author_created') targetAgentId = 'hrd';
+      else if (event.action === 'db_purged') targetAgentId = 'robosweep';
+      else if (isBotteleAction) targetAgentId = 'scout';
+      else targetAgentId = 'scribe';
+    }
 
     // 1. Target agent stops chilling and returns to PC desk
     store.setAgentWorking(targetAgentId);
@@ -362,23 +377,70 @@ class EventBridge {
       return;
     }
 
-    // Standard AdaFakta Webhook Handling
-    const isPublish = event.action === 'article_published';
-    if (isPublish) {
+    // Standard AdaFakta Webhook Handling (7 Workflow Actions)
+    if (event.action === 'article_published') {
       soundManager.playPublishChime();
       this.dispatchHologram({
         agentId: targetAgentId,
         type: 'SEO_PING',
-        title: '🚀 BERITA TERBIT DI ADAFAKTA',
-        subtitle: event.title.substring(0, 48),
+        title: '🎉 BERITA RESMI TAYANG',
+        subtitle: `Hore! "${event.title.substring(0, 42)}" tayang ke publik`,
         timestamp: Date.now()
       });
-      // Fire confetti if available
-      if (typeof window !== 'undefined' && (window as any).confetti) {
-        try {
-          (window as any).confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-        } catch {}
-      }
+    } else if (event.action === 'cover_generated') {
+      soundManager.playCameraFlash();
+      this.dispatchHologram({
+        agentId: targetAgentId,
+        type: 'WEBP_COMPRESS',
+        title: '📸 FOTO SAMPUL IMGBB SIAP',
+        subtitle: 'Foto 16:9 dioptimalkan ke WebP CDN',
+        timestamp: Date.now()
+      });
+    } else if (event.action === 'draft_created') {
+      soundManager.playKeyboardClick();
+      this.dispatchHologram({
+        agentId: targetAgentId,
+        type: 'GEMINI_DRAFT',
+        title: '🕵️‍♂️ DRAF BREAKING NEWS MASUK',
+        subtitle: `${event.source || 'Portal'}: ${event.title.substring(0, 38)}`,
+        timestamp: Date.now()
+      });
+    } else if (event.action === 'article_rewritten') {
+      soundManager.playKeyboardClick();
+      this.dispatchHologram({
+        agentId: targetAgentId,
+        type: 'GEMINI_DRAFT',
+        title: '🔗 MENYADUR BERITA DARI URL',
+        subtitle: `${event.source || 'Sumber luar'}: ${event.title.substring(0, 36)}`,
+        timestamp: Date.now()
+      });
+    } else if (event.action === 'ai_studio_generated') {
+      soundManager.playSciFiChime();
+      this.dispatchHologram({
+        agentId: targetAgentId,
+        type: 'GEMINI_DRAFT',
+        title: '🪄 AI STUDIO SELESAI MERACIK',
+        subtitle: `Model ${event.model || 'Gemini'} menuntaskan narasi investigasi`,
+        timestamp: Date.now()
+      });
+    } else if (event.action === 'author_created') {
+      soundManager.playPublishChime();
+      this.dispatchHologram({
+        agentId: targetAgentId,
+        type: 'SEO_PING',
+        title: '👥 WARTAWAN BARU BERGABUNG',
+        subtitle: `Selamat bergabung ${event.author || 'Kontributor'} di Redaksi`,
+        timestamp: Date.now()
+      });
+    } else if (event.action === 'db_purged') {
+      soundManager.playServerPulse();
+      this.dispatchHologram({
+        agentId: targetAgentId,
+        type: 'WEBP_COMPRESS',
+        title: '🧹 DATABASE SELESAI DIBERSIHKAN',
+        subtitle: 'Bzzzt! Temporary cache & log dibersihkan',
+        timestamp: Date.now()
+      });
     } else {
       soundManager.playKeyboardClick();
       this.dispatchHologram({
@@ -391,6 +453,7 @@ class EventBridge {
     }
 
     // 3. Add to Kanban Pipeline
+    const isPublish = event.action === 'article_published';
     const newArticleStage = isPublish ? 'published' : 'drafting';
     store.addArticle({
       title: event.title,
@@ -413,7 +476,7 @@ class EventBridge {
       agentColor: '#38BDF8',
       category: isPublish ? 'publishing' : 'editorial',
       level: 'success',
-      message: `[WEBHOOK] ${targetAgentId.toUpperCase()} memproses: "${event.title.substring(0, 42)}..."`
+      message: `[WEBHOOK] ${targetAgentId.toUpperCase()} (${event.action}): "${event.title.substring(0, 42)}..."`
     });
   }
 

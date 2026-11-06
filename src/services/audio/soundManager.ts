@@ -210,6 +210,57 @@ class SoundManager {
       // Ignore
     }
   }
+
+  // 6. Camera Blitz Shutter Click
+  public playCameraFlash() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Quick dual click: mirror slap + shutter
+      [0, 0.05].forEach((delay) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(1400, now + delay);
+        osc.frequency.exponentialRampToValueAtTime(300, now + delay + 0.03);
+        gain.gain.setValueAtTime(0.04, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.035);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.035);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  // 7. AI Studio Sci-Fi Hologram Chime
+  public playSciFiChime() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.25);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    } catch {
+      // Ignore
+    }
+  }
 }
 
 export const soundManager = new SoundManager();

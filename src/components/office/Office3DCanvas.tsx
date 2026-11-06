@@ -8,6 +8,7 @@ import { soundManager } from '@/services/audio/soundManager';
 import { eventBridge } from '@/services/live/eventBridge';
 import { StatsOverview } from '@/components/dashboard/StatsOverview';
 import { ArticleReaderModal } from '@/components/dashboard/ArticleReaderModal';
+import { OfficeEventBanner } from './OfficeEventBanner';
 import { CameraNavGizmo } from './CameraNavGizmo';
 import {
   Compass,
@@ -446,6 +447,9 @@ export const Office3DCanvas: React.FC = () => {
           <span>KLIK AGEN: KERJA // NYANTAI</span>
         </span>
       </div>
+
+      {/* FLOATING EVENT BANNER & SPEECH BUBBLE OVERLAY */}
+      <OfficeEventBanner />
 
       {/* ARTICLE READER MODAL (5W+1H FULL PREVIEW) */}
       <ArticleReaderModal />

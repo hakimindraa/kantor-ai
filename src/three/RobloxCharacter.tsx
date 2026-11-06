@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { AgentData } from '@/types/agent';
 import { useOfficeStore } from '@/store/officeStore';
 import { calculateOfficePath, getRandomRoamingWaypoint } from '@/services/navigation/officeWaypoints';
+import { resolveCharacterCollision } from '@/services/physics/officeCollision';
 
 const AGENT_THOUGHTS: Record<string, { work: string[]; chill: string[] }> = {
   scout: {
@@ -176,6 +177,71 @@ const AGENT_THOUGHTS: Record<string, { work: string[]; chill: string[] }> = {
       '“Pasar modal tutup sesi, saatnya santai dulu 📈”',
       '“Ngobrol santai portofolio dengan Bang Tarak.”',
       '“Secangkir kopi espresso hangat penyegar modal.”'
+    ]
+  },
+  scout_west: {
+    work: [
+      '“Radar barat menyisir feed breaking news...”',
+      '“Draf berita masuk dari portal mitra!”',
+      '“Sinyal draft_created diteruskan ke redaksi...”',
+      '“Memvalidasi kesegaran rilis pers nasional...”'
+    ],
+    chill: [
+      '“Radar aman sepi, nyruput teh hangat dulu...”',
+      '“Ngobrol santai bareng Bang Tarak di bar.”',
+      '“Sinyal berita lagi santai sore.”'
+    ]
+  },
+  sadur: {
+    work: [
+      '“Membuka lembaran koran & kliping berita...”',
+      '“Menyadur artikel rujukan luar negeri...”',
+      '“Parafrase berimbang sesuai kode etik jurnalistik...”',
+      '“Naskah saduran orisinal siap dipublikasikan!”'
+    ],
+    chill: [
+      '“Koran hari ini sudah habis dibaca 📰”',
+      '“Duduk santai di meja makan cafe breakroom.”',
+      '“Secangkir kopi tubruk Bang Tarak tiada tanding.”'
+    ]
+  },
+  nova: {
+    work: [
+      '“Mengaktifkan tabung hologram AI Studio...”',
+      '“Partikel prompt engineering berputar aktif!”',
+      '“Meracik naskah komparatif multi-LLM...”',
+      '“Eksplorasi sudut pandang berita investigatif.”'
+    ],
+    chill: [
+      '“Model AI selesai generasi naskah, istirahat dulu...”',
+      '“Menikmati suasana adem breakroom Kopi Tarak.”',
+      '“Secangkir kopi latte hangat penambah inspirasi.”'
+    ]
+  },
+  hrd: {
+    work: [
+      '“Memperbarui bagan struktur tim redaksi...”',
+      '“Verifikasi akun & kartu pers wartawan baru!”',
+      '“Penugasan rubrik liputan terdistribusi rata...”',
+      '“Semua jurnalis siap meliput breaking news!”'
+    ],
+    chill: [
+      '“Roster tim lengkap, saatnya ngopi sore...”',
+      '“Menyapa rekan-rekan redaksi di Kopi Tarak.”',
+      '“Suasana kantor makin solid dan kompak.”'
+    ]
+  },
+  robosweep: {
+    work: [
+      '“Bzzzt! Menyapu cache basi database Neon...”',
+      '“Vacuum robot aktif: lantai server bersih kinclong!”',
+      '“Auto-purge logs temporary tuntas tanpa sisa...”',
+      '“Latensi database terjaga stabil 22ms!”'
+    ],
+    chill: [
+      '“Bzzzt! Baterai 100%, standby di docking charger ⚡”',
+      '“Lantai bersih, sistem adem terkendali.”',
+      '“Menunggu jadwal pembersihan berikutnya...”'
     ]
   }
 };
@@ -573,6 +639,70 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
           hatRibbon: '#A7F3D0',
           visorGlow: '#34D399'
         };
+      case 'scout_west':
+        return {
+          mainColor: '#0284C7',   // Breaking Radar Cyan Blue
+          torso: '#0284C7',       // Field Ingestion Vest
+          sleeve: '#0369A1',
+          accent: '#BAE6FD',      // Incoming Wire Badge
+          tie: '#0C4A6E',
+          legs: '#1E293B',
+          hatBase: '#0369A1',
+          hatCrown: '#0284C7',
+          hatRibbon: '#E0F2FE'
+        };
+      case 'sadur':
+        return {
+          mainColor: '#8B5CF6',   // Vintage Violet Editor
+          torso: '#7C3AED',       // Newsroom Waistcoat
+          sleeve: '#6D28D9',
+          accent: '#DDD6FE',      // Press Pocket Pen
+          tie: '#4C1D95',
+          legs: '#334155',
+          hatBase: '#5B21B6',     // Newsboy Cap
+          hatCrown: '#6D28D9',
+          hatRibbon: '#DDD6FE',
+          glasses: '#8B5CF6'
+        };
+      case 'nova':
+        return {
+          mainColor: '#EC4899',   // AI Studio Hot Magenta
+          torso: '#DB2777',       // Lab Cyber Coat
+          sleeve: '#BE185D',
+          accent: '#FCE7F3',      // Hologram Reactor Badge
+          tie: '#9D174D',
+          legs: '#1E293B',
+          hatBase: '#BE185D',
+          hatCrown: '#DB2777',
+          hatRibbon: '#FBCFE8',
+          visorGlow: '#F472B6'
+        };
+      case 'hrd':
+        return {
+          mainColor: '#3B82F6',   // Royal Navy Executive
+          torso: '#2563EB',       // Corporate Blazer
+          sleeve: '#1D4ED8',
+          accent: '#EFF6FF',      // Lanyard & ID Card
+          tie: '#1E40AF',
+          legs: '#1E293B',
+          hatBase: '#1D4ED8',
+          hatCrown: '#2563EB',
+          hatRibbon: '#DBEAFE',
+          glasses: '#3B82F6'
+        };
+      case 'robosweep':
+        return {
+          mainColor: '#64748B',   // Metallic Robot Slate
+          torso: '#475569',
+          sleeve: '#334155',
+          accent: '#10B981',      // Charging LED Green
+          tie: '#0F172A',
+          legs: '#0F172A',
+          hatBase: '#334155',
+          hatCrown: '#475569',
+          hatRibbon: '#38BDF8',
+          visorGlow: '#10B981'
+        };
       case 'artha':
       default:
         return {
@@ -752,19 +882,39 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
       const dz = nextWaypoint[2] - worldPosRef.current[2];
       const dist = Math.hypot(dx, dz);
 
-      if (dist < 0.18) {
+      const isFinalWaypoint = waypointsQueueRef.current.length === 1;
+      const arrivalThreshold = isFinalWaypoint ? 0.35 : 0.28;
+
+      if (dist < arrivalThreshold) {
         // Reached current waypoint, pop next
         waypointsQueueRef.current.shift();
         if (waypointsQueueRef.current.length === 0) {
           isNavigatingRef.current = false;
+          worldPosRef.current[0] = currentTargetPos[0];
+          worldPosRef.current[2] = currentTargetPos[2];
           worldRotRef.current = currentTargetRot;
         }
       } else {
         isNavigatingRef.current = true;
         const walkSpeed = 2.4; // 2.4 units / sec
         const step = Math.min(dist, walkSpeed * delta);
-        worldPosRef.current[0] += (dx / dist) * step;
-        worldPosRef.current[2] += (dz / dist) * step;
+        const candidateX = worldPosRef.current[0] + (dx / dist) * step;
+        const candidateZ = worldPosRef.current[2] + (dz / dist) * step;
+
+        if (isFinalWaypoint && dist < 0.6) {
+          // Final approach into seat (smooth seating without obstruction)
+          worldPosRef.current[0] = candidateX;
+          worldPosRef.current[2] = candidateZ;
+        } else {
+          // Corridor & doorway navigation with obstacle collision check
+          const [resX, , resZ] = resolveCharacterCollision(
+            worldPosRef.current,
+            [candidateX, 0, candidateZ],
+            0.24
+          );
+          worldPosRef.current[0] = resX;
+          worldPosRef.current[2] = resZ;
+        }
 
         const heading = Math.atan2(dx, dz);
         let diff = heading - worldRotRef.current;
@@ -1056,267 +1206,423 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
       )}
 
       {/* ================= ROBLOX BLOCKY RIG - MINIMALIST INDUSTRIAL ================= */}
-
-      {/* 1. TORSO */}
-      <group ref={torsoRef} position={[0, 0.95, 0]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[0.75, 0.85, 0.44]} />
-          <meshStandardMaterial color={agentStyle.torso} roughness={0.4} metalness={0.05} />
-        </mesh>
-
-        {/* Minimalist Front Chest Detail */}
-        {agent.id === 'scout' && (
-          <group position={[0, 0.08, 0.23]}>
-            <mesh position={[0, 0, 0]}>
-              <boxGeometry args={[0.22, 0.52, 0.02]} />
-              <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
-            </mesh>
-            <mesh position={[0, 0.04, 0.015]}>
-              <boxGeometry args={[0.08, 0.38, 0.02]} />
-              <meshStandardMaterial color={agentStyle.tie} roughness={0.3} />
-            </mesh>
-          </group>
-        )}
-        {agent.id === 'scribe' && (
-          <group position={[0, 0.06, 0.23]}>
-            <mesh>
-              <boxGeometry args={[0.1, 0.52, 0.02]} />
-              <meshStandardMaterial color={agentStyle.accent} roughness={0.3} />
-            </mesh>
-          </group>
-        )}
-        {agent.id === 'pixel' && (
-          <mesh position={[0, -0.15, 0.23]}>
-            <boxGeometry args={[0.42, 0.22, 0.03]} />
-            <meshStandardMaterial color={agentStyle.accent} roughness={0.6} />
+      {agent.id === 'robosweep' ? (
+        /* ROBO-SWEEP AUTONOMOUS VACUUM CLEANER MODEL */
+        <group position={[0, 0, 0]}>
+          {/* Main Disc Chassis */}
+          <mesh position={[0, 0.1, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.38, 0.42, 0.16, 24]} />
+            <meshStandardMaterial color="#242832" roughness={0.3} metalness={0.7} />
           </mesh>
-        )}
-        {agent.id === 'chronos' && (
-          <mesh position={[0, 0.08, 0.23]}>
-            <boxGeometry args={[0.55, 0.1, 0.02]} />
-            <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
+          {/* Glowing Status Ring */}
+          <mesh position={[0, 0.11, 0]}>
+            <cylinderGeometry args={[0.425, 0.425, 0.02, 24]} />
+            <meshBasicMaterial color={isWorking ? '#38BDF8' : '#10B981'} />
           </mesh>
-        )}
-        {agent.id === 'radar' && (
-          <group position={[0, 0.08, 0.23]}>
-            <mesh position={[-0.14, 0, 0]}>
-              <boxGeometry args={[0.06, 0.48, 0.02]} />
-              <meshStandardMaterial color={agentStyle.accent} />
-            </mesh>
-            <mesh position={[0.14, 0, 0]}>
-              <boxGeometry args={[0.06, 0.48, 0.02]} />
-              <meshStandardMaterial color={agentStyle.accent} />
-            </mesh>
-          </group>
-        )}
-        {agent.id === 'sentry' && (
-          <mesh position={[0, 0.05, 0.23]}>
-            <boxGeometry args={[0.55, 0.58, 0.03]} />
-            <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
+          {/* Top Lidar Turret Sensor */}
+          <mesh position={[0, 0.22, -0.06]} castShadow>
+            <cylinderGeometry args={[0.1, 0.12, 0.08, 16]} />
+            <meshStandardMaterial color="#1E293B" metalness={0.9} />
           </mesh>
-        )}
-        {agent.id === 'hermes' && (
-          <group position={[0, 0, 0.23]}>
-            <mesh position={[-0.18, 0, 0]} rotation={[0, 0, 0.2]}>
-              <boxGeometry args={[0.08, 0.86, 0.02]} />
-              <meshStandardMaterial color={agentStyle.accent} />
-            </mesh>
-            <mesh position={[0.18, 0, 0]} rotation={[0, 0, -0.2]}>
-              <boxGeometry args={[0.08, 0.86, 0.02]} />
-              <meshStandardMaterial color={agentStyle.accent} />
-            </mesh>
-          </group>
-        )}
-      </group>
-
-      {/* 2. HEAD */}
-      <group ref={headRef} position={[0, 1.58, 0]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[0.55, 0.55, 0.55]} />
-          <meshStandardMaterial color={skinColor} roughness={0.4} />
-        </mesh>
-
-        {/* Eyes (Local +Z face) - Soft Charcoal */}
-        <mesh position={[-0.14, 0.05, 0.28]}>
-          <boxGeometry args={[0.08, 0.09, 0.02]} />
-          <meshBasicMaterial color="#1E222A" />
-        </mesh>
-        <mesh position={[0.14, 0.05, 0.28]}>
-          <boxGeometry args={[0.08, 0.09, 0.02]} />
-          <meshBasicMaterial color="#1E222A" />
-        </mesh>
-        {/* Smile */}
-        <mesh position={[0, -0.12, 0.28]}>
-          <boxGeometry args={[0.22, 0.04, 0.02]} />
-          <meshBasicMaterial color="#64748B" />
-        </mesh>
-
-        {/* ================= AGENT SPECIFIC HEADWEAR ================= */}
-        {/* SCOUT: Honey Amber Fedora Hat */}
-        {agent.id === 'scout' && (
-          <group position={[0, 0.3, 0]}>
+          <mesh position={[0, 0.265, -0.06]}>
+            <sphereGeometry args={[0.03, 8, 8]} />
+            <meshBasicMaterial color="#38BDF8" />
+          </mesh>
+          {/* Front Bumper & Digital Face Screen */}
+          <mesh position={[0, 0.1, 0.36]}>
+            <boxGeometry args={[0.32, 0.06, 0.04]} />
+            <meshBasicMaterial color="#0284C7" />
+          </mesh>
+          {/* Sweeper Brushes */}
+          <group position={[-0.26, 0.03, 0.28]}>
             <mesh>
-              <boxGeometry args={[0.85, 0.06, 0.85]} />
-              <meshStandardMaterial color={agentStyle.hatBase} roughness={0.5} />
-            </mesh>
-            <mesh position={[0, 0.16, 0]}>
-              <boxGeometry args={[0.55, 0.26, 0.55]} />
-              <meshStandardMaterial color={agentStyle.hatCrown} roughness={0.5} />
-            </mesh>
-            <mesh position={[0, 0.07, 0]}>
-              <boxGeometry args={[0.57, 0.06, 0.57]} />
-              <meshStandardMaterial color={agentStyle.hatRibbon} roughness={0.3} />
+              <cylinderGeometry args={[0.08, 0.08, 0.01, 8]} />
+              <meshStandardMaterial color="#64748B" roughness={0.8} />
             </mesh>
           </group>
-        )}
-
-        {/* SCRIBE: Minimalist Architect Glasses */}
-        {agent.id === 'scribe' && (
-          <group position={[0, 0.05, 0.3]}>
+          <group position={[0.26, 0.03, 0.28]}>
             <mesh>
-              <boxGeometry args={[0.48, 0.12, 0.03]} />
-              <meshStandardMaterial color={agentStyle.glasses || '#1E293B'} metalness={0.7} roughness={0.2} />
+              <cylinderGeometry args={[0.08, 0.08, 0.01, 8]} />
+              <meshStandardMaterial color="#64748B" roughness={0.8} />
             </mesh>
           </group>
-        )}
+        </group>
+      ) : (
+        <>
+          {/* 1. TORSO */}
+          <group ref={torsoRef} position={[0, 0.95, 0]}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.75, 0.85, 0.44]} />
+              <meshStandardMaterial color={agentStyle.torso} roughness={0.4} metalness={0.05} />
+            </mesh>
 
-        {/* PIXEL: Streetwear Coral Cap */}
-        {agent.id === 'pixel' && (
-          <group position={[0, 0.28, 0]}>
-            <mesh>
-              <boxGeometry args={[0.58, 0.16, 0.58]} />
-              <meshStandardMaterial color={agentStyle.hatBase} roughness={0.6} />
+            {/* Minimalist Front Chest Detail */}
+            {agent.id === 'scout' && (
+              <group position={[0, 0.08, 0.23]}>
+                <mesh position={[0, 0, 0]}>
+                  <boxGeometry args={[0.22, 0.52, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
+                </mesh>
+                <mesh position={[0, 0.04, 0.015]}>
+                  <boxGeometry args={[0.08, 0.38, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.tie} roughness={0.3} />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'scribe' && (
+              <group position={[0, 0.06, 0.23]}>
+                <mesh>
+                  <boxGeometry args={[0.1, 0.52, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} roughness={0.3} />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'pixel' && (
+              <mesh position={[0, -0.15, 0.23]}>
+                <boxGeometry args={[0.42, 0.22, 0.03]} />
+                <meshStandardMaterial color={agentStyle.accent} roughness={0.6} />
+              </mesh>
+            )}
+            {agent.id === 'chronos' && (
+              <mesh position={[0, 0.08, 0.23]}>
+                <boxGeometry args={[0.55, 0.1, 0.02]} />
+                <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
+              </mesh>
+            )}
+            {agent.id === 'radar' && (
+              <group position={[0, 0.08, 0.23]}>
+                <mesh position={[-0.14, 0, 0]}>
+                  <boxGeometry args={[0.06, 0.48, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+                <mesh position={[0.14, 0, 0]}>
+                  <boxGeometry args={[0.06, 0.48, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'sentry' && (
+              <mesh position={[0, 0.05, 0.23]}>
+                <boxGeometry args={[0.55, 0.58, 0.03]} />
+                <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
+              </mesh>
+            )}
+            {agent.id === 'hermes' && (
+              <group position={[0, 0, 0.23]}>
+                <mesh position={[-0.18, 0, 0]} rotation={[0, 0, 0.2]}>
+                  <boxGeometry args={[0.08, 0.86, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+                <mesh position={[0.18, 0, 0]} rotation={[0, 0, -0.2]}>
+                  <boxGeometry args={[0.08, 0.86, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'scout_west' && (
+              <group position={[0, 0.08, 0.23]}>
+                <mesh position={[0, 0, 0]}>
+                  <boxGeometry args={[0.26, 0.54, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} roughness={0.4} />
+                </mesh>
+                <mesh position={[0, 0.04, 0.015]}>
+                  <boxGeometry args={[0.08, 0.36, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.tie} roughness={0.3} />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'sadur' && (
+              <group position={[0, 0.04, 0.23]}>
+                <mesh position={[-0.16, 0, 0]}>
+                  <boxGeometry args={[0.05, 0.65, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+                <mesh position={[0.16, 0, 0]}>
+                  <boxGeometry args={[0.05, 0.65, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+                <mesh position={[0, 0.12, 0]}>
+                  <boxGeometry args={[0.1, 0.28, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.tie} />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'nova' && (
+              <group position={[0, 0.05, 0.23]}>
+                <mesh>
+                  <boxGeometry args={[0.45, 0.5, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.accent} />
+                </mesh>
+                <mesh position={[0, 0.08, 0.015]} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderGeometry args={[0.08, 0.08, 0.02, 12]} />
+                  <meshBasicMaterial color="#EC4899" />
+                </mesh>
+              </group>
+            )}
+            {agent.id === 'hrd' && (
+              <group position={[0, 0, 0.23]}>
+                <mesh position={[0, 0.15, 0]}>
+                  <boxGeometry args={[0.08, 0.45, 0.02]} />
+                  <meshStandardMaterial color={agentStyle.tie} />
+                </mesh>
+                {/* Lanyard ID badge */}
+                <mesh position={[0.18, -0.05, 0.01]}>
+                  <boxGeometry args={[0.12, 0.16, 0.02]} />
+                  <meshStandardMaterial color="#FFFFFF" />
+                </mesh>
+              </group>
+            )}
+          </group>
+
+          {/* 2. HEAD */}
+          <group ref={headRef} position={[0, 1.58, 0]}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[0.55, 0.55, 0.55]} />
+              <meshStandardMaterial color={skinColor} roughness={0.4} />
             </mesh>
-            <mesh position={[0, 0.05, 0.36]} rotation={[-0.2, 0, 0]}>
-              <boxGeometry args={[0.45, 0.04, 0.22]} />
-              <meshStandardMaterial color={agentStyle.hatRibbon} roughness={0.6} />
+
+            {/* Eyes (Local +Z face) - Soft Charcoal */}
+            <mesh position={[-0.14, 0.05, 0.28]}>
+              <boxGeometry args={[0.08, 0.09, 0.02]} />
+              <meshBasicMaterial color="#1E222A" />
             </mesh>
-            <mesh position={[0, 0.08, 0.29]}>
-              <boxGeometry args={[0.12, 0.06, 0.02]} />
-              <meshStandardMaterial color="#FFFFFF" />
+            <mesh position={[0.14, 0.05, 0.28]}>
+              <boxGeometry args={[0.08, 0.09, 0.02]} />
+              <meshBasicMaterial color="#1E222A" />
+            </mesh>
+            {/* Smile */}
+            <mesh position={[0, -0.12, 0.28]}>
+              <boxGeometry args={[0.22, 0.04, 0.02]} />
+              <meshBasicMaterial color="#64748B" />
+            </mesh>
+
+            {/* ================= AGENT SPECIFIC HEADWEAR ================= */}
+            {/* SCOUT: Honey Amber Fedora Hat */}
+            {agent.id === 'scout' && (
+              <group position={[0, 0.3, 0]}>
+                <mesh>
+                  <boxGeometry args={[0.85, 0.06, 0.85]} />
+                  <meshStandardMaterial color={agentStyle.hatBase} roughness={0.5} />
+                </mesh>
+                <mesh position={[0, 0.16, 0]}>
+                  <boxGeometry args={[0.55, 0.26, 0.55]} />
+                  <meshStandardMaterial color={agentStyle.hatCrown} roughness={0.5} />
+                </mesh>
+                <mesh position={[0, 0.07, 0]}>
+                  <boxGeometry args={[0.57, 0.06, 0.57]} />
+                  <meshStandardMaterial color={agentStyle.hatRibbon} roughness={0.3} />
+                </mesh>
+              </group>
+            )}
+
+            {/* SCRIBE: Minimalist Architect Glasses */}
+            {agent.id === 'scribe' && (
+              <group position={[0, 0.05, 0.3]}>
+                <mesh>
+                  <boxGeometry args={[0.48, 0.12, 0.03]} />
+                  <meshStandardMaterial color={agentStyle.glasses || '#1E293B'} metalness={0.7} roughness={0.2} />
+                </mesh>
+              </group>
+            )}
+
+            {/* PIXEL: Streetwear Coral Cap */}
+            {agent.id === 'pixel' && (
+              <group position={[0, 0.28, 0]}>
+                <mesh>
+                  <boxGeometry args={[0.58, 0.16, 0.58]} />
+                  <meshStandardMaterial color={agentStyle.hatBase} roughness={0.6} />
+                </mesh>
+                <mesh position={[0, 0.05, 0.36]} rotation={[-0.2, 0, 0]}>
+                  <boxGeometry args={[0.45, 0.04, 0.22]} />
+                  <meshStandardMaterial color={agentStyle.hatRibbon} roughness={0.6} />
+                </mesh>
+                <mesh position={[0, 0.08, 0.29]}>
+                  <boxGeometry args={[0.12, 0.06, 0.02]} />
+                  <meshStandardMaterial color="#FFFFFF" />
+                </mesh>
+              </group>
+            )}
+
+            {/* CHRONOS: Luminous Sky Blue Cyber Visor */}
+            {agent.id === 'chronos' && (
+              <group position={[0, 0.05, 0.29]}>
+                <mesh>
+                  <boxGeometry args={[0.58, 0.14, 0.04]} />
+                  <meshStandardMaterial color={agentStyle.visorFrame || '#0369A1'} metalness={0.6} />
+                </mesh>
+                <mesh position={[0, 0, 0.02]}>
+                  <boxGeometry args={[0.52, 0.08, 0.02]} />
+                  <meshBasicMaterial color={agentStyle.visorGlow || '#7DD3FC'} />
+                </mesh>
+              </group>
+            )}
+
+            {/* RADAR: Brushed Antenna Headset */}
+            {agent.id === 'radar' && (
+              <group position={[0, 0.28, 0]}>
+                <mesh position={[0.28, 0, 0]}>
+                  <boxGeometry args={[0.06, 0.2, 0.2]} />
+                  <meshStandardMaterial color={agentStyle.hatBase} metalness={0.6} />
+                </mesh>
+                <mesh position={[0.3, 0.25, 0]}>
+                  <cylinderGeometry args={[0.02, 0.02, 0.3, 6]} />
+                  <meshStandardMaterial color={agentStyle.antenna || '#F3E8FF'} metalness={0.9} roughness={0.2} />
+                </mesh>
+              </group>
+            )}
+
+            {/* SENTRY: Stealth Lime Cyber Helmet */}
+            {agent.id === 'sentry' && (
+              <group>
+                <mesh position={[0, 0.05, 0]}>
+                  <boxGeometry args={[0.62, 0.65, 0.62]} />
+                  <meshStandardMaterial color={agentStyle.hatBase} metalness={0.5} roughness={0.4} />
+                </mesh>
+                <mesh position={[0, 0.05, 0.31]}>
+                  <boxGeometry args={[0.52, 0.12, 0.03]} />
+                  <meshBasicMaterial color={agentStyle.visorGlow || '#BEF264'} />
+                </mesh>
+              </group>
+            )}
+
+            {/* HERMES: Dispatch Envoy Cap */}
+            {agent.id === 'hermes' && (
+              <group position={[0, 0.28, 0]}>
+                <mesh>
+                  <boxGeometry args={[0.58, 0.16, 0.58]} />
+                  <meshStandardMaterial color={agentStyle.hatBase} roughness={0.5} />
+                </mesh>
+                <mesh position={[0, 0.05, 0.36]} rotation={[-0.2, 0, 0]}>
+                  <boxGeometry args={[0.45, 0.04, 0.22]} />
+                  <meshStandardMaterial color={agentStyle.hatRibbon} roughness={0.5} />
+                </mesh>
+                <mesh position={[0, 0.08, 0.29]}>
+                  <boxGeometry args={[0.24, 0.02, 0.02]} />
+                  <meshStandardMaterial color="#FFFFFF" />
+                </mesh>
+              </group>
+            )}
+
+            {/* SCOUT_WEST: Cyan Breaking Wire Headset */}
+            {agent.id === 'scout_west' && (
+              <group position={[0, 0.28, 0]}>
+                <mesh position={[0.28, 0, 0]}>
+                  <boxGeometry args={[0.06, 0.2, 0.2]} />
+                  <meshStandardMaterial color="#0284C7" metalness={0.7} />
+                </mesh>
+                <mesh position={[0.3, 0.22, 0]}>
+                  <cylinderGeometry args={[0.02, 0.02, 0.28, 6]} />
+                  <meshStandardMaterial color="#38BDF8" metalness={0.9} />
+                </mesh>
+              </group>
+            )}
+
+            {/* SADUR: Vintage Newsboy Cap & Spectacles */}
+            {agent.id === 'sadur' && (
+              <group>
+                <group position={[0, 0.28, 0]}>
+                  <mesh>
+                    <boxGeometry args={[0.62, 0.14, 0.62]} />
+                    <meshStandardMaterial color={agentStyle.hatBase} roughness={0.7} />
+                  </mesh>
+                  <mesh position={[0, 0.04, 0.36]} rotation={[-0.15, 0, 0]}>
+                    <boxGeometry args={[0.46, 0.03, 0.2]} />
+                    <meshStandardMaterial color={agentStyle.hatCrown} roughness={0.7} />
+                  </mesh>
+                </group>
+                {/* Glasses */}
+                <mesh position={[0, 0.05, 0.3]}>
+                  <boxGeometry args={[0.46, 0.1, 0.03]} />
+                  <meshStandardMaterial color="#8B5CF6" metalness={0.8} />
+                </mesh>
+              </group>
+            )}
+
+            {/* NOVA: Holographic Cyber Visor */}
+            {agent.id === 'nova' && (
+              <group position={[0, 0.05, 0.29]}>
+                <mesh>
+                  <boxGeometry args={[0.56, 0.12, 0.04]} />
+                  <meshStandardMaterial color="#BE185D" metalness={0.7} />
+                </mesh>
+                <mesh position={[0, 0, 0.02]}>
+                  <boxGeometry args={[0.5, 0.08, 0.02]} />
+                  <meshBasicMaterial color="#F472B6" />
+                </mesh>
+              </group>
+            )}
+
+            {/* HRD: Corporate Executive Glasses */}
+            {agent.id === 'hrd' && (
+              <group position={[0, 0.05, 0.3]}>
+                <mesh>
+                  <boxGeometry args={[0.46, 0.1, 0.03]} />
+                  <meshStandardMaterial color="#1E40AF" metalness={0.8} />
+                </mesh>
+              </group>
+            )}
+          </group>
+
+          {/* 3. ARMS */}
+          <group ref={leftArmRef} position={[-0.52, 1.25, 0]}>
+            <mesh position={[0, -0.35, 0]} castShadow>
+              <boxGeometry args={[0.26, 0.75, 0.3]} />
+              <meshStandardMaterial color={agentStyle.sleeve} roughness={0.5} />
+            </mesh>
+            <mesh position={[0, -0.78, 0]}>
+              <boxGeometry args={[0.22, 0.16, 0.26]} />
+              <meshStandardMaterial color={skinColor} />
             </mesh>
           </group>
-        )}
 
-        {/* CHRONOS: Luminous Sky Blue Cyber Visor */}
-        {agent.id === 'chronos' && (
-          <group position={[0, 0.05, 0.29]}>
-            <mesh>
-              <boxGeometry args={[0.58, 0.14, 0.04]} />
-              <meshStandardMaterial color={agentStyle.visorFrame || '#0369A1'} metalness={0.6} />
+          <group ref={rightArmRef} position={[0.52, 1.25, 0]}>
+            <mesh position={[0, -0.35, 0]} castShadow>
+              <boxGeometry args={[0.26, 0.75, 0.3]} />
+              <meshStandardMaterial color={agentStyle.sleeve} roughness={0.5} />
             </mesh>
-            <mesh position={[0, 0, 0.02]}>
-              <boxGeometry args={[0.52, 0.08, 0.02]} />
-              <meshBasicMaterial color={agentStyle.visorGlow || '#7DD3FC'} />
+            <mesh position={[0, -0.78, 0]}>
+              <boxGeometry args={[0.22, 0.16, 0.26]} />
+              <meshStandardMaterial color={skinColor} />
+            </mesh>
+
+            {/* Coffee Mug in Hand when Chilling / Nyantai! */}
+            {isChilling && (
+              <group position={[0, -0.85, 0.18]} rotation={[0.4, 0, 0]}>
+                {/* Ceramic Mug - Signature Agent Color */}
+                <mesh>
+                  <cylinderGeometry args={[0.08, 0.08, 0.16, 12]} />
+                  <meshStandardMaterial color={agentStyle.mainColor} roughness={0.3} />
+                </mesh>
+                {/* Dark Espresso Liquid inside */}
+                <mesh position={[0, 0.06, 0]}>
+                  <cylinderGeometry args={[0.075, 0.075, 0.02, 12]} />
+                  <meshStandardMaterial color="#22252C" roughness={0.1} />
+                </mesh>
+                {/* Mug Handle */}
+                <mesh position={[0.1, 0, 0]}>
+                  <boxGeometry args={[0.04, 0.09, 0.04]} />
+                  <meshStandardMaterial color={agentStyle.mainColor} />
+                </mesh>
+              </group>
+            )}
+          </group>
+
+          {/* 4. LEGS */}
+          <group ref={leftLegRef} position={[-0.24, 0.55, 0]}>
+            <mesh position={[0, -0.32, 0]} castShadow>
+              <boxGeometry args={[0.3, 0.65, 0.35]} />
+              <meshStandardMaterial color={agentStyle.legs} roughness={0.7} />
             </mesh>
           </group>
-        )}
 
-        {/* RADAR: Brushed Antenna Headset */}
-        {agent.id === 'radar' && (
-          <group position={[0, 0.28, 0]}>
-            <mesh position={[0.28, 0, 0]}>
-              <boxGeometry args={[0.06, 0.2, 0.2]} />
-              <meshStandardMaterial color={agentStyle.hatBase} metalness={0.6} />
-            </mesh>
-            <mesh position={[0.3, 0.25, 0]}>
-              <cylinderGeometry args={[0.02, 0.02, 0.3, 6]} />
-              <meshStandardMaterial color={agentStyle.antenna || '#F3E8FF'} metalness={0.9} roughness={0.2} />
+          <group ref={rightLegRef} position={[0.24, 0.55, 0]}>
+            <mesh position={[0, -0.32, 0]} castShadow>
+              <boxGeometry args={[0.3, 0.65, 0.35]} />
+              <meshStandardMaterial color={agentStyle.legs} roughness={0.7} />
             </mesh>
           </group>
-        )}
-
-        {/* SENTRY: Stealth Lime Cyber Helmet */}
-        {agent.id === 'sentry' && (
-          <group>
-            <mesh position={[0, 0.05, 0]}>
-              <boxGeometry args={[0.62, 0.65, 0.62]} />
-              <meshStandardMaterial color={agentStyle.hatBase} metalness={0.5} roughness={0.4} />
-            </mesh>
-            <mesh position={[0, 0.05, 0.31]}>
-              <boxGeometry args={[0.52, 0.12, 0.03]} />
-              <meshBasicMaterial color={agentStyle.visorGlow || '#BEF264'} />
-            </mesh>
-          </group>
-        )}
-
-        {/* HERMES: Dispatch Envoy Cap */}
-        {agent.id === 'hermes' && (
-          <group position={[0, 0.28, 0]}>
-            <mesh>
-              <boxGeometry args={[0.58, 0.16, 0.58]} />
-              <meshStandardMaterial color={agentStyle.hatBase} roughness={0.5} />
-            </mesh>
-            <mesh position={[0, 0.05, 0.36]} rotation={[-0.2, 0, 0]}>
-              <boxGeometry args={[0.45, 0.04, 0.22]} />
-              <meshStandardMaterial color={agentStyle.hatRibbon} roughness={0.5} />
-            </mesh>
-            <mesh position={[0, 0.08, 0.29]}>
-              <boxGeometry args={[0.24, 0.02, 0.02]} />
-              <meshStandardMaterial color="#FFFFFF" />
-            </mesh>
-          </group>
-        )}
-      </group>
-
-      {/* 3. ARMS */}
-      <group ref={leftArmRef} position={[-0.52, 1.25, 0]}>
-        <mesh position={[0, -0.35, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.75, 0.3]} />
-          <meshStandardMaterial color={agentStyle.sleeve} roughness={0.5} />
-        </mesh>
-        <mesh position={[0, -0.78, 0]}>
-          <boxGeometry args={[0.22, 0.16, 0.26]} />
-          <meshStandardMaterial color={skinColor} />
-        </mesh>
-      </group>
-
-      <group ref={rightArmRef} position={[0.52, 1.25, 0]}>
-        <mesh position={[0, -0.35, 0]} castShadow>
-          <boxGeometry args={[0.26, 0.75, 0.3]} />
-          <meshStandardMaterial color={agentStyle.sleeve} roughness={0.5} />
-        </mesh>
-        <mesh position={[0, -0.78, 0]}>
-          <boxGeometry args={[0.22, 0.16, 0.26]} />
-          <meshStandardMaterial color={skinColor} />
-        </mesh>
-
-        {/* Coffee Mug in Hand when Chilling / Nyantai! */}
-        {isChilling && (
-          <group position={[0, -0.85, 0.18]} rotation={[0.4, 0, 0]}>
-            {/* Ceramic Mug - Signature Agent Color */}
-            <mesh>
-              <cylinderGeometry args={[0.08, 0.08, 0.16, 12]} />
-              <meshStandardMaterial color={agentStyle.mainColor} roughness={0.3} />
-            </mesh>
-            {/* Dark Espresso Liquid inside */}
-            <mesh position={[0, 0.06, 0]}>
-              <cylinderGeometry args={[0.075, 0.075, 0.02, 12]} />
-              <meshStandardMaterial color="#22252C" roughness={0.1} />
-            </mesh>
-            {/* Mug Handle */}
-            <mesh position={[0.1, 0, 0]}>
-              <boxGeometry args={[0.04, 0.09, 0.04]} />
-              <meshStandardMaterial color={agentStyle.mainColor} />
-            </mesh>
-          </group>
-        )}
-      </group>
-
-      {/* 4. LEGS */}
-      <group ref={leftLegRef} position={[-0.24, 0.55, 0]}>
-        <mesh position={[0, -0.32, 0]} castShadow>
-          <boxGeometry args={[0.3, 0.65, 0.35]} />
-          <meshStandardMaterial color={agentStyle.legs} roughness={0.7} />
-        </mesh>
-      </group>
-
-      <group ref={rightLegRef} position={[0.24, 0.55, 0]}>
-        <mesh position={[0, -0.32, 0]} castShadow>
-          <boxGeometry args={[0.3, 0.65, 0.35]} />
-          <meshStandardMaterial color={agentStyle.legs} roughness={0.7} />
-        </mesh>
-      </group>
+        </>
+      )}
     </group>
   );
 };

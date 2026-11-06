@@ -170,7 +170,7 @@ export const OfficeScene: React.FC = () => {
       })}
 
       {/* ================= 4b. BARTENDER "KOPI TARAK" (BANG TARAK) ================= */}
-      <BaristaCharacter position={[0.0, 0, -5.2]} rotation={0} />
+      <BaristaCharacter position={[-1.5, 0, -6.0]} rotation={0} />
 
       {/* ================= 5. CONTROLLERS ================= */}
       <CharacterController />

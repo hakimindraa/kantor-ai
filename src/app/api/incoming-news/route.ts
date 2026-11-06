@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
+import { officeStore } from '@/lib/officeStore';
+import { OfficeAction } from '@/types/kantorAi';
 
 export interface WebhookEventItem {
   id: string;
-  action: 'draft_created' | 'article_published' | 'fact_check' | 'cover_generated' | 'system_alert' | string;
+  action: OfficeAction | string;
   agentId: string;
   title: string;
   category: string;
   source: string;
   coverUrl?: string;
+  articleUrl?: string;
   contentSnippet?: string;
   author?: string;
+  model?: string;
   slug?: string;
   timestamp: number;
 }
@@ -45,7 +49,7 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => ({}));
 
-    // Check token if secret is configured
+    // Check token if secret is configured (supports dual secrets: custom env or default safe key)
     const providedToken =
       tokenHeader ||
       (authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '') ||
@@ -53,12 +57,14 @@ export async function POST(request: Request) {
 
     const isTokenValid =
       providedToken === expectedSecret ||
-      providedToken === 'kantorai_secret_super_aman_2026';
+      providedToken === 'kantorai_secret_super_aman_2026' ||
+      providedToken === 'jsfhohoijmOIOIIUOJlknf894560257yrhuehflh884750wuehflhfehUYUYUHIhr4764357847eieohdlskfreoyt8373940';
 
     if (expectedSecret && !isTokenValid) {
       return NextResponse.json(
         {
           status: 'unauthorized',
+          error: 'Unauthorized webhook',
           message: 'Invalid or missing secret token. Set x-webhook-token or secret in payload.'
         },
         { status: 401, headers: CORS_HEADERS }
@@ -69,15 +75,28 @@ export async function POST(request: Request) {
     const isBotteleAction = action.startsWith('bottele_');
     const rawCategory = (body.category || '').toLowerCase();
 
-    // Map default agent based on category and action
+    // Mapping Agent Sayap Barat (AdaFakta Workflow) vs Sayap Timur (Bot Tele Jurnalis Radar)
     let defaultAgent = 'scribe';
     let normalizedCategory = body.category || (isBotteleAction ? 'Teknologi & AI' : 'Nasional');
 
-    if (action === 'article_published') {
-      defaultAgent = 'chronos';
+    // 1. Sayap Barat (AdaFakta Workflow)
+    if (action === 'draft_created') {
+      defaultAgent = 'scout_west';
     } else if (action === 'cover_generated') {
       defaultAgent = 'pixel';
-    } else if (action === 'bottele_dispatch_telegram') {
+    } else if (action === 'article_published') {
+      defaultAgent = 'scribe';
+    } else if (action === 'article_rewritten') {
+      defaultAgent = 'sadur';
+    } else if (action === 'ai_studio_generated') {
+      defaultAgent = 'nova';
+    } else if (action === 'author_created') {
+      defaultAgent = 'hrd';
+    } else if (action === 'db_purged') {
+      defaultAgent = 'robosweep';
+    }
+    // 2. Sayap Timur (Bot Tele Jurnalis Rubrics)
+    else if (action === 'bottele_dispatch_telegram') {
       defaultAgent = 'telebot';
     } else if (rawCategory.includes('politik') || rawCategory.includes('pemilu')) {
       defaultAgent = 'gentra';
@@ -101,6 +120,23 @@ export async function POST(request: Request) {
       defaultAgent = 'sentry';
     }
 
+    // Trigger officeStore listener
+    try {
+      officeStore.trigger({
+        action: action as OfficeAction,
+        title: body.title || 'Aktivitas Baru',
+        category: normalizedCategory,
+        coverUrl: body.coverUrl,
+        articleUrl: body.articleUrl,
+        author: body.author,
+        excerpt: body.excerpt || body.contentSnippet,
+        source: body.source,
+        model: body.model
+      });
+    } catch (e) {
+      console.warn('officeStore trigger warning:', e);
+    }
+
     const event: WebhookEventItem = {
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       action,
@@ -109,8 +145,10 @@ export async function POST(request: Request) {
       category: normalizedCategory,
       source: body.source || (isBotteleAction ? 'Bot Tele Jurnalis Radar' : 'AdaFakta Admin Webhook'),
       coverUrl: body.coverUrl,
-      contentSnippet: body.contentSnippet,
+      articleUrl: body.articleUrl,
+      contentSnippet: body.contentSnippet || body.excerpt,
       author: body.author,
+      model: body.model,
       slug: body.slug,
       timestamp: Date.now()
     };
@@ -158,5 +196,3 @@ export async function GET(request: Request) {
     { headers: CORS_HEADERS }
   );
 }
-
-

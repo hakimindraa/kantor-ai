@@ -41,7 +41,12 @@ export const LiveActivityView: React.FC = () => {
         'cipher',
         'gentra',
         'gaia',
-        'artha'
+        'artha',
+        'scout_west',
+        'sadur',
+        'nova',
+        'hrd',
+        'robosweep'
       ] as AgentId[];
       const pickedAgentId = activeAgents[Math.floor(Math.random() * activeAgents.length)];
       const templates = SIMULATION_TEMPLATES[pickedAgentId];
@@ -65,7 +70,12 @@ export const LiveActivityView: React.FC = () => {
         cipher: 'editorial',
         gentra: 'editorial',
         gaia: 'editorial',
-        artha: 'editorial'
+        artha: 'editorial',
+        scout_west: 'fetch',
+        sadur: 'editorial',
+        nova: 'editorial',
+        hrd: 'editorial',
+        robosweep: 'infrastructure'
       };
 
       addActivityLog({

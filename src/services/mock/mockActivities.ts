@@ -163,6 +163,31 @@ export const SIMULATION_TEMPLATES: Record<AgentId, string[]> = {
     'Memantau ticker pergerakan indeks IHSG, nilai tukar Rupiah, dan imbal hasil obligasi.',
     'Menyaring laporan keuangan emiten kuartal IV dan kebijakan suku bunga BI.',
     'Menyusun ringkasan analisis sentimen pasar modal dan risiko inflasi.'
+  ],
+  scout_west: [
+    'Mendeteksi incoming RSS berita terbaru dari portal media mitra.',
+    'Mengirim sinyal draft_created ke Meja Redaksi Sayap Barat.',
+    'Menyaring headline berita nasional & memvalidasi integritas konten.'
+  ],
+  sadur: [
+    'Membuka lembaran koran & mencatat poin penting naskah berita sumber.',
+    'Menyadur artikel dengan parafrase berimbang sesuai kaidah jurnalistik.',
+    'Memvalidasi kutipan wawancara dari portal berita terpercaya.'
+  ],
+  nova: [
+    'Meracik naskah mendalam menggunakan tabung AI Studio mutakhir.',
+    'Melakukan penajaman narasi liputan investigatif bertenaga AI.',
+    'Eksplorasi gaya penulisan feature news dan analisis kontekstual.'
+  ],
+  hrd: [
+    'Memperbarui roster tim penulis dan status kontributor aktif.',
+    'Mendaftarkan profil wartawan baru ke papan struktur redaksi.',
+    'Menyinkronkan penugasan rubrik liputan ke seluruh jurnalis.'
+  ],
+  robosweep: [
+    'Menyisir temporary cache dan file log lama di area server.',
+    'Melakukan auto-purge database untuk menjaga latensi tetap prima.',
+    'Meluncur kembali ke stasiun dock pengisian daya server.'
   ]
 };
 
