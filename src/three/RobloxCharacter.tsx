@@ -6,6 +6,7 @@ import { Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { AgentData } from '@/types/agent';
 import { useOfficeStore } from '@/store/officeStore';
+import { calculateOfficePath, getRandomRoamingWaypoint } from '@/services/navigation/officeWaypoints';
 
 const AGENT_THOUGHTS: Record<string, { work: string[]; chill: string[] }> = {
   scout: {
@@ -216,6 +217,89 @@ function createAgentBadgeTexture(name: string, isWorking: boolean, mainColor: st
   return texture;
 }
 
+function createHologramNotificationTexture(
+  title: string,
+  subtitle?: string,
+  accentColor: string = '#38BDF8'
+): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 130;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  const x = 10;
+  const y = 8;
+  const w = 492;
+  const h = 108;
+
+  // Background Box - Deep Dark Glass with rounded appearance
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(x, y, w, h);
+
+  // Glowing Neon Border
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = accentColor;
+  ctx.strokeRect(x, y, w, h);
+
+  // Glow line at top
+  ctx.fillStyle = accentColor;
+  ctx.fillRect(x, y, w, 6);
+
+  // Hologram Event Title
+  ctx.font = 'bold 21px "Courier New", monospace, sans-serif';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.fillText(title, 256, 50);
+
+  // Subtitle
+  if (subtitle) {
+    ctx.font = '14px "Courier New", monospace, sans-serif';
+    ctx.fillStyle = accentColor;
+    ctx.fillText(subtitle, 256, 84);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createChronosTimerTexture(seconds: number): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 440;
+  canvas.height = 90;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+  ctx.fillStyle = '#0C1322';
+  ctx.fillRect(10, 8, 420, 74);
+
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#0EA5E9';
+  ctx.strokeRect(10, 8, 420, 74);
+
+  ctx.font = 'bold 14px "Courier New", monospace';
+  ctx.fillStyle = '#7DD3FC';
+  ctx.textAlign = 'center';
+  ctx.fillText('⏱️ WATERFALL QUEUE PACING', 220, 34);
+
+  ctx.font = '900 24px "Courier New", monospace';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(`NEXT PUBLISH: ${timeStr}`, 220, 64);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
 interface RobloxCharacterProps {
   agent: AgentData;
   isControlled?: boolean;
@@ -234,10 +318,14 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
   const selectAgent = useOfficeStore((state) => state.selectAgent);
   const selectedAgentId = useOfficeStore((state) => state.selectedAgentId);
   const movementMode = useOfficeStore((state) => state.movementMode);
+  const activeHologram = useOfficeStore((state) => state.activeHologram);
+  const chronosCountdown = useOfficeStore((state) => state.chronosCountdown);
+  const setAgentIdle = useOfficeStore((state) => state.setAgentIdle);
 
   const isSelected = selectedAgentId === agent.id;
   const isWorking = agent.status === 'working';
   const isChilling = agent.status === 'idle';
+  const isAgentActiveDirective = activeHologram?.agentId === agent.id;
 
   const rootGroupRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Group>(null);
@@ -385,15 +473,67 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
     return createThoughtBubbleTexture(currentThought, agentStyle.mainColor);
   }, [currentThought, agentStyle.mainColor]);
 
+  const hologramTexture = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    if (!activeHologram || activeHologram.agentId !== agent.id) return null;
+    return createHologramNotificationTexture(
+      activeHologram.title,
+      activeHologram.subtitle,
+      agentStyle.mainColor
+    );
+  }, [activeHologram, agent.id, agentStyle.mainColor]);
+
+  const chronosTimerTexture = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    if (agent.id !== 'chronos') return null;
+    return createChronosTimerTexture(chronosCountdown);
+  }, [agent.id, chronosCountdown]);
+
+  // 3D Navigation Waypoints & Movement State
+  const worldPosRef = useRef<[number, number, number]>([...currentTargetPos]);
+  const worldRotRef = useRef<number>(currentTargetRot);
+  const waypointsQueueRef = useRef<[number, number, number][]>([]);
+  const isNavigatingRef = useRef<boolean>(false);
+
+  // When target destination changes (Work <-> Chill or Roam), calculate safe corridor path
+  useEffect(() => {
+    if (movementMode !== 'MANUAL') {
+      const path = calculateOfficePath(worldPosRef.current, currentTargetPos);
+      waypointsQueueRef.current = path;
+      isNavigatingRef.current = path.length > 0;
+    }
+  }, [currentTargetPos, movementMode]);
+
+  // Autonomous Roaming Timer for Idle Agents (walks around breakroom/cafe)
+  useEffect(() => {
+    if (!isChilling || movementMode === 'MANUAL') return;
+
+    // Stagger roaming checks (14s to 24s per agent)
+    const stagger = (agent.id.charCodeAt(0) % 7) * 1400;
+    const roamInterval = 16000 + stagger;
+
+    const timer = setInterval(() => {
+      // Only roam if currently stationary (not already walking)
+      if (waypointsQueueRef.current.length === 0) {
+        const nextWp = getRandomRoamingWaypoint();
+        setAgentIdle(agent.id, nextWp.position, nextWp.rotation);
+      }
+    }, roamInterval);
+
+    return () => clearInterval(timer);
+  }, [isChilling, agent.id, movementMode, setAgentIdle]);
+
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
 
     // 1. If manually controlled by player (WASD)
     if (isControlled && movementMode === 'MANUAL') {
       if (manualPosition && rootGroupRef.current) {
+        worldPosRef.current = [...manualPosition];
         rootGroupRef.current.position.set(manualPosition[0], manualPosition[1], manualPosition[2]);
       }
       if (manualRotation !== undefined && rootGroupRef.current) {
+        worldRotRef.current = manualRotation;
         rootGroupRef.current.rotation.y = manualRotation;
       }
 
@@ -449,11 +589,71 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
 
     if (!rootGroupRef.current) return;
 
-    // Reset base transform to current target
-    rootGroupRef.current.position.set(currentTargetPos[0], currentTargetPos[1], currentTargetPos[2]);
-    rootGroupRef.current.rotation.y = currentTargetRot;
+    // 2. Autonomous Waypoint Pathfinding Movement
+    if (waypointsQueueRef.current.length > 0) {
+      const nextWaypoint = waypointsQueueRef.current[0];
+      const dx = nextWaypoint[0] - worldPosRef.current[0];
+      const dz = nextWaypoint[2] - worldPosRef.current[2];
+      const dist = Math.hypot(dx, dz);
 
-    // ================= STATE ANIMATION =================
+      if (dist < 0.18) {
+        // Reached current waypoint, pop next
+        waypointsQueueRef.current.shift();
+        if (waypointsQueueRef.current.length === 0) {
+          isNavigatingRef.current = false;
+          worldRotRef.current = currentTargetRot;
+        }
+      } else {
+        isNavigatingRef.current = true;
+        const walkSpeed = 2.4; // 2.4 units / sec
+        const step = Math.min(dist, walkSpeed * delta);
+        worldPosRef.current[0] += (dx / dist) * step;
+        worldPosRef.current[2] += (dz / dist) * step;
+
+        const heading = Math.atan2(dx, dz);
+        let diff = heading - worldRotRef.current;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        worldRotRef.current += diff * Math.min(1, 10 * delta);
+      }
+
+      rootGroupRef.current.position.set(worldPosRef.current[0], worldPosRef.current[1], worldPosRef.current[2]);
+      rootGroupRef.current.rotation.y = worldRotRef.current;
+
+      // Active Walking Animation
+      const walkCycle = time * 11;
+      const legSwing = Math.sin(walkCycle) * 0.55;
+      const armSwing = Math.sin(walkCycle) * 0.5;
+
+      if (torsoRef.current) torsoRef.current.position.set(0, 0.95 + Math.abs(Math.sin(walkCycle)) * 0.04, 0);
+      if (headRef.current) {
+        headRef.current.position.set(0, 1.58, 0);
+        headRef.current.rotation.set(0, 0, 0);
+      }
+      if (leftLegRef.current) {
+        leftLegRef.current.position.set(-0.24, 0.55, 0);
+        leftLegRef.current.rotation.set(legSwing, 0, 0);
+      }
+      if (rightLegRef.current) {
+        rightLegRef.current.position.set(0.24, 0.55, 0);
+        rightLegRef.current.rotation.set(-legSwing, 0, 0);
+      }
+      if (leftArmRef.current) {
+        leftArmRef.current.position.set(-0.52, 1.25, 0);
+        leftArmRef.current.rotation.set(-armSwing, 0, 0.08);
+      }
+      if (rightArmRef.current) {
+        rightArmRef.current.position.set(0.52, 1.25, 0);
+        rightArmRef.current.rotation.set(isChilling ? -0.8 : armSwing, 0, -0.08);
+      }
+      return;
+    }
+
+    // 3. Static Transform when Resting at Destination
+    rootGroupRef.current.position.set(worldPosRef.current[0], worldPosRef.current[1], worldPosRef.current[2]);
+    rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(rootGroupRef.current.rotation.y, currentTargetRot, 0.15);
+
+    // ================= STATE ANIMATION (AT DESTINATION) =================
     if (isWorking) {
       // 💻 BEKERJA DI MEJA PC (DUDUK TEGAK DI KURSI KANTOR, MENGETIK KEYBOARD)
       // Top surface of office chair cushion is at Y = 0.46. Torso bottom rests directly on cushion (0.46 + 0.85/2 = 0.885).
@@ -479,7 +679,7 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
       }
 
       // Shoulders move down with torso (shoulder Y = 1.21). Hands actively typing on keyboard
-      const typeSpeed = 13;
+      const typeSpeed = isAgentActiveDirective ? 26 : 13;
       const leftType = -Math.PI / 3.0 + Math.sin(time * typeSpeed) * 0.1;
       const rightType = -Math.PI / 3.0 + Math.cos(time * typeSpeed + 1) * 0.1;
       if (leftArmRef.current) {
@@ -492,8 +692,12 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
       }
     } else {
       // ☕ NYANTAI DI BREAKROOM
-      if (agent.id === 'pixel') {
-        // Pixel sits on high barstool (seat top is at Y = 0.88)
+      const isAtBarStool = currentTargetPos[2] > -1.5 && currentTargetPos[2] < -0.7 && currentTargetPos[0] > 4.0 && currentTargetPos[0] < 9.0;
+      const isAtDiningTable = (currentTargetPos[0] > 3.0 && currentTargetPos[0] < 5.5 && currentTargetPos[2] > 1.5 && currentTargetPos[2] < 4.2) ||
+                              (currentTargetPos[0] > 8.0 && currentTargetPos[0] < 10.5 && currentTargetPos[2] > 1.5 && currentTargetPos[2] < 4.2);
+
+      if (isAtBarStool) {
+        // Pixel / Barstool sitting pose (high barstool cushion is Y = 0.88)
         if (torsoRef.current) torsoRef.current.position.set(0, 1.305, 0);
         if (headRef.current) {
           headRef.current.position.set(0, 2.005, 0);
@@ -516,7 +720,7 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
           const sip = Math.sin(time * 1.3);
           rightArmRef.current.rotation.set(-Math.PI / 2.5 + sip * 0.2, 0, -0.2);
         }
-      } else if (['scout', 'scribe', 'chronos', 'radar'].includes(agent.id)) {
+      } else if (isAtDiningTable) {
         // Sitting on cafe dining chair (seat cushion top is at Y = 0.48)
         if (torsoRef.current) torsoRef.current.position.set(0, 0.905, 0.02);
         if (headRef.current) {
@@ -541,7 +745,7 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
           rightArmRef.current.rotation.set(-Math.PI / 2.5 + sip * 0.22, 0, -0.2);
         }
       } else {
-        // Standing relaxing near fridge (Sentry) / coffee machine (Hermes)
+        // Standing relaxing near fridge (Sentry) / coffee machine (Hermes) / lounge
         if (torsoRef.current) torsoRef.current.position.set(0, 0.95, 0);
         if (headRef.current) {
           headRef.current.position.set(0, 1.58, 0);
@@ -635,6 +839,64 @@ export const RobloxCharacter: React.FC<RobloxCharacterProps> = ({
             />
           </mesh>
         </Billboard>
+      )}
+
+      {/* Floating Real-Time Directive / Event Hologram Banner */}
+      {hologramTexture && (
+        <Billboard
+          position={[0, isWorking ? 3.45 : (agent.id === 'pixel' && isChilling ? 3.90 : 3.75), 0]}
+          follow={true}
+        >
+          <mesh
+            renderOrder={1000}
+            onClick={(e) => {
+              e.stopPropagation();
+              selectAgent(agent.id);
+            }}
+          >
+            <planeGeometry args={[2.7, 0.72]} />
+            <meshBasicMaterial
+              map={hologramTexture}
+              transparent={true}
+              depthTest={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </Billboard>
+      )}
+
+      {/* Floating Chronos Queue Countdown Timer HUD */}
+      {chronosTimerTexture && agent.id === 'chronos' && isWorking && !hologramTexture && (
+        <Billboard
+          position={[0, 3.40, 0]}
+          follow={true}
+        >
+          <mesh
+            renderOrder={1000}
+            onClick={(e) => {
+              e.stopPropagation();
+              selectAgent('chronos');
+            }}
+          >
+            <planeGeometry args={[2.3, 0.5]} />
+            <meshBasicMaterial
+              map={chronosTimerTexture}
+              transparent={true}
+              depthTest={false}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </Billboard>
+      )}
+
+      {/* Radar SEO Pulse Wave effect */}
+      {agent.id === 'radar' && isWorking && (
+        <group position={[0, 0.08, 0]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.9, 1.05, 32]} />
+            <meshBasicMaterial color="#C084FC" transparent opacity={0.35} side={THREE.DoubleSide} />
+          </mesh>
+        </group>
       )}
 
       {/* ================= ROBLOX BLOCKY RIG - MINIMALIST INDUSTRIAL ================= */}

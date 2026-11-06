@@ -52,7 +52,8 @@ function createKopiTarakSignTexture(): THREE.CanvasTexture {
 function createMonitorScreenTexture(
   agentId?: string,
   isWorking: boolean = true,
-  label?: string
+  label?: string,
+  hologramText?: string
 ): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 512;
@@ -120,6 +121,16 @@ function createMonitorScreenTexture(
   ctx.font = 'bold 12px "Courier New", monospace';
   ctx.fillStyle = '#CBD5E1';
   ctx.fillText('● RUNNING', 496, 24);
+
+  // Directive banner if active
+  if (hologramText) {
+    ctx.fillStyle = '#0F766E';
+    ctx.fillRect(10, 40, 492, 24);
+    ctx.fillStyle = '#F0FDFA';
+    ctx.font = 'bold 11px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`⚡ DIRECTIVE: ${hologramText.slice(0, 40)}`, 16, 56);
+  }
 
   // Body content by Agent Role
   ctx.textAlign = 'left';
@@ -236,12 +247,14 @@ export const DesktopPC: React.FC<{
 }> = ({ position, rotation = 0, agentId, label }) => {
   const selectAgent = useOfficeStore((state) => state.selectAgent);
   const agent = useOfficeStore((state) => (agentId ? state.agents.find((a) => a.id === agentId) : undefined));
+  const activeHologram = useOfficeStore((state) => state.activeHologram);
   const isWorking = agent ? agent.status === 'working' : true;
+  const hologramText = (activeHologram && activeHologram.agentId === agentId) ? activeHologram.title : undefined;
 
   const screenTexture = useMemo(() => {
     if (typeof window === 'undefined') return null;
-    return createMonitorScreenTexture(agentId, isWorking, label);
-  }, [agentId, isWorking, label]);
+    return createMonitorScreenTexture(agentId, isWorking, label, hologramText);
+  }, [agentId, isWorking, label, hologramText]);
 
   return (
     <group
@@ -334,6 +347,92 @@ export const OfficeChair: React.FC<{
   );
 };
 
+// ================= SENTRY DEVOPS SERVER RACK BAY WITH BLINKING LEDS =================
+export const SentryServerRackBay: React.FC<{ position: [number, number, number] }> = ({ position }) => {
+  const incidentAlert = useOfficeStore((state) => state.incidentAlert);
+  const selectAgent = useOfficeStore((state) => state.selectAgent);
+  const isIncident = incidentAlert.active;
+
+  // Blinking LED state for active server activity
+  const [blink, setBlink] = React.useState(false);
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setBlink((prev) => !prev);
+    }, 450);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <group
+      position={position}
+      onClick={(e) => {
+        e.stopPropagation();
+        selectAgent('sentry');
+      }}
+    >
+      {[-2.0, 0, 2.0].map((x, idx) => (
+        <group key={`server-${idx}`} position={[x, 0, 0]}>
+          {/* Main 42U Server Cabinet */}
+          <mesh position={[0, 1.2, 0]} castShadow>
+            <boxGeometry args={[1.2, 2.4, 0.8]} />
+            <meshStandardMaterial color="#282B33" metalness={0.7} roughness={0.4} />
+          </mesh>
+
+          {/* 6 Server Blade Slots */}
+          {Array.from({ length: 6 }).map((_, slot) => (
+            <group key={`slot-${slot}`} position={[0, 0.4 + slot * 0.32, 0.41]}>
+              <mesh>
+                <boxGeometry args={[1.0, 0.22, 0.02]} />
+                <meshStandardMaterial color="#3B404B" metalness={0.6} />
+              </mesh>
+
+              {/* Slot Indicator LEDs (activity blinking) */}
+              <mesh position={[-0.42, 0, 0.015]}>
+                <boxGeometry args={[0.04, 0.04, 0.01]} />
+                <meshBasicMaterial
+                  color={
+                    isIncident
+                      ? (blink ? '#EF4444' : '#7F1D1D')
+                      : ((slot + idx) % 2 === 0 ? (blink ? '#10B981' : '#047857') : '#06B6D4')
+                  }
+                />
+              </mesh>
+              <mesh position={[-0.34, 0, 0.015]}>
+                <boxGeometry args={[0.04, 0.04, 0.01]} />
+                <meshBasicMaterial
+                  color={
+                    isIncident
+                      ? '#F59E0B'
+                      : ((slot + idx) % 3 === 0 ? (blink ? '#38BDF8' : '#0284C7') : '#10B981')
+                  }
+                />
+              </mesh>
+            </group>
+          ))}
+
+          {/* Rack Top Status Beacon */}
+          <mesh position={[-0.35, 1.6, 0.43]}>
+            <boxGeometry args={[0.08, 0.08, 0.02]} />
+            <meshBasicMaterial color={isIncident ? '#EF4444' : '#34D399'} />
+          </mesh>
+          <mesh position={[0.35, 1.6, 0.43]}>
+            <boxGeometry args={[0.08, 0.08, 0.02]} />
+            <meshBasicMaterial color={isIncident ? (blink ? '#F59E0B' : '#78350F') : '#38BDF8'} />
+          </mesh>
+
+          {/* Rack Floor Luminous Glow */}
+          <pointLight
+            position={[0, 0.2, 0.6]}
+            intensity={isIncident ? 0.8 : 0.4}
+            distance={2.5}
+            color={isIncident ? '#EF4444' : '#10B981'}
+          />
+        </group>
+      ))}
+    </group>
+  );
+};
+
 // ================= 1. REDAKSI AI WORKSTATION BAY =================
 export const OpenOfficeWorkstations: React.FC = () => {
   return (
@@ -408,30 +507,7 @@ export const OpenOfficeWorkstations: React.FC = () => {
       <OfficeChair position={[-3.5, 0, 1.35]} rotation={Math.PI} />
 
       {/* ================= SENTRY DEVOPS SERVER RACK BAY ================= */}
-      <group position={[-7.0, 0, -6.8]}>
-        {[-2.0, 0, 2.0].map((x, idx) => (
-          <group key={`server-${idx}`} position={[x, 0, 0]}>
-            <mesh position={[0, 1.2, 0]} castShadow>
-              <boxGeometry args={[1.2, 2.4, 0.8]} />
-              <meshStandardMaterial color="#282B33" metalness={0.7} roughness={0.4} />
-            </mesh>
-            {Array.from({ length: 6 }).map((_, slot) => (
-              <mesh key={`slot-${slot}`} position={[0, 0.4 + slot * 0.32, 0.41]}>
-                <boxGeometry args={[1.0, 0.22, 0.02]} />
-                <meshStandardMaterial color="#3B404B" metalness={0.6} />
-              </mesh>
-            ))}
-            <mesh position={[-0.35, 1.6, 0.43]}>
-              <boxGeometry args={[0.08, 0.08, 0.02]} />
-              <meshBasicMaterial color="#FFFFFF" />
-            </mesh>
-            <mesh position={[0.35, 1.6, 0.43]}>
-              <boxGeometry args={[0.08, 0.08, 0.02]} />
-              <meshBasicMaterial color="#CBD5E1" />
-            </mesh>
-          </group>
-        ))}
-      </group>
+      <SentryServerRackBay position={[-7.0, 0, -6.8]} />
 
       {/* Low Bookshelves & Plants along front edge Z = 4.4 - Fresh Slate & Charcoal */}
       {[-10.2, -7.0, -3.8].map((x, idx) => (

@@ -4,6 +4,31 @@ export type MovementMode = 'AUTOMATIC' | 'MANUAL';
 
 export type CameraInteractionMode = 'ORBIT' | 'PAN';
 
+export type OfficeDataMode = 'LIVE' | 'DEMO';
+
+export type TimeOfDay = 'DAY' | 'SUNSET' | 'NIGHT';
+
+export type RemoteActionType =
+  | 'SCRAPE_NOW'
+  | 'PUBLISH_NOW'
+  | 'PURGE_CACHE'
+  | 'TEST_TELEGRAM';
+
+export interface OfficeIncident {
+  type: 'API_TIMEOUT' | 'DB_HIGH_LATENCY' | 'QUEUE_EMPTY' | 'NONE';
+  message: string;
+  active: boolean;
+  timestamp?: number;
+}
+
+export interface HologramEvent {
+  agentId: AgentId;
+  type: 'WEBP_COMPRESS' | 'GEMINI_DRAFT' | 'RSS_BREAKING' | 'TELEGRAM_ALERT' | 'SEO_PING';
+  title: string;
+  subtitle?: string;
+  timestamp: number;
+}
+
 export type CameraActionType =
   | 'PAN_LEFT'
   | 'PAN_RIGHT'

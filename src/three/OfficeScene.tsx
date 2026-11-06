@@ -19,28 +19,92 @@ export const OfficeScene: React.FC = () => {
   const controlledAgentId = useOfficeStore((state) => state.controlledAgentId);
   const playerPosition = useOfficeStore((state) => state.playerPosition);
   const playerRotation = useOfficeStore((state) => state.playerRotation);
+  const timeOfDay = useOfficeStore((state) => state.timeOfDay);
+
+  const lighting = React.useMemo(() => {
+    switch (timeOfDay) {
+      case 'SUNSET':
+        return {
+          fogColor: '#382229',
+          ambientColor: '#FED7AA',
+          ambientIntensity: 0.7,
+          hemiSky: '#FDBA74',
+          hemiGround: '#7C2D12',
+          hemiIntensity: 0.55,
+          keyColor: '#FB923C',
+          keyIntensity: 1.5,
+          windowColor: '#F97316',
+          windowIntensity: 0.8,
+          workstationLightColor: '#FFEDD5',
+          workstationLightIntensity: 0.9,
+          breakroomLightColor: '#FDBA74',
+          breakroomLightIntensity: 1.1,
+          serverLightColor: '#CBD5E1',
+          serverLightIntensity: 0.8
+        };
+      case 'NIGHT':
+        return {
+          fogColor: '#090D16',
+          ambientColor: '#1E293B',
+          ambientIntensity: 0.35,
+          hemiSky: '#38BDF8',
+          hemiGround: '#020617',
+          hemiIntensity: 0.25,
+          keyColor: '#60A5FA',
+          keyIntensity: 0.45,
+          windowColor: '#3B82F6',
+          windowIntensity: 0.35,
+          workstationLightColor: '#38BDF8',
+          workstationLightIntensity: 1.8,
+          breakroomLightColor: '#F59E0B',
+          breakroomLightIntensity: 1.6,
+          serverLightColor: '#4ADE80',
+          serverLightIntensity: 1.2
+        };
+      case 'DAY':
+      default:
+        return {
+          fogColor: '#2A2E38',
+          ambientColor: '#F8FAFC',
+          ambientIntensity: 0.85,
+          hemiSky: '#FFFFFF',
+          hemiGround: '#64748B',
+          hemiIntensity: 0.55,
+          keyColor: '#FFFFFF',
+          keyIntensity: 1.4,
+          windowColor: '#CBD5E1',
+          windowIntensity: 0.65,
+          workstationLightColor: '#FFFFFF',
+          workstationLightIntensity: 1.0,
+          breakroomLightColor: '#FFFFFF',
+          breakroomLightIntensity: 1.0,
+          serverLightColor: '#E2E8F0',
+          serverLightIntensity: 0.8
+        };
+    }
+  }, [timeOfDay]);
 
   return (
     <>
-      {/* ================= ARCHITECTURAL STUDIO FOG - FRESH LUMINOUS CHARCOAL ================= */}
-      <fog attach="fog" args={['#2A2E38', 38, 90]} />
+      {/* ================= ARCHITECTURAL STUDIO FOG ================= */}
+      <fog attach="fog" args={[lighting.fogColor, 38, 90]} />
 
-      {/* ================= CRISP DAYLIGHT & SOFT INDUSTRIAL CHARCOAL LIGHTING ================= */}
-      {/* 1. Neutral Ambient Fill - Boosted for high visibility so agents are sharply illuminated */}
-      <ambientLight color="#F8FAFC" intensity={0.85} />
+      {/* ================= DYNAMIC TIME-OF-DAY STUDIO LIGHTING ================= */}
+      {/* 1. Neutral Ambient Fill */}
+      <ambientLight color={lighting.ambientColor} intensity={lighting.ambientIntensity} />
 
-      {/* 2. Soft Sky & Ground Bounce (Crisp Daylight Sky & Fresh Slate Ground) */}
+      {/* 2. Soft Sky & Ground Bounce */}
       <hemisphereLight
-        color="#FFFFFF"
-        groundColor="#64748B"
-        intensity={0.55}
+        color={lighting.hemiSky}
+        groundColor={lighting.hemiGround}
+        intensity={lighting.hemiIntensity}
       />
 
-      {/* 3. Primary Key Daylight with Crisp Architectural Shadows */}
+      {/* 3. Primary Key Sunlight / Sunset / Moon with Crisp Shadows */}
       <directionalLight
         position={[22, 28, 20]}
-        intensity={1.4}
-        color="#FFFFFF"
+        intensity={lighting.keyIntensity}
+        color={lighting.keyColor}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -53,22 +117,22 @@ export const OfficeScene: React.FC = () => {
         shadow-bias={-0.0003}
       />
 
-      {/* 4. Soft Window Daylight Fill from the Left (Fresh Slate Gray Fill) */}
+      {/* 4. Soft Window Daylight Fill from the Left */}
       <directionalLight
         position={[-20, 16, -10]}
-        intensity={0.65}
-        color="#CBD5E1"
+        intensity={lighting.windowIntensity}
+        color={lighting.windowColor}
       />
 
       {/* 5. INDUSTRIAL STUDIO ACCENT LIGHTS */}
-      {/* Workstation Monitors Pure White Daylight Fill */}
-      <pointLight position={[-7.0, 3.2, 0]} color="#FFFFFF" intensity={1.0} distance={14} />
+      {/* Workstation Monitors Illumination Fill */}
+      <pointLight position={[-7.0, 3.2, 0]} color={lighting.workstationLightColor} intensity={lighting.workstationLightIntensity} distance={14} />
 
-      {/* Breakroom Gallery Soft Neutral Daylight Fill */}
-      <pointLight position={[6.5, 3.0, -1.8]} color="#FFFFFF" intensity={1.0} distance={14} />
+      {/* Breakroom Gallery / Kopi Tarak Illumination Fill */}
+      <pointLight position={[6.5, 3.0, -1.8]} color={lighting.breakroomLightColor} intensity={lighting.breakroomLightIntensity} distance={14} />
 
       {/* Server Rack DevOps Clean Light */}
-      <pointLight position={[-7.0, 2.2, -6.0]} color="#E2E8F0" intensity={0.8} distance={10} />
+      <pointLight position={[-7.0, 2.2, -6.0]} color={lighting.serverLightColor} intensity={lighting.serverLightIntensity} distance={10} />
 
       {/* ================= 1. ARCHITECTURAL FLOOR & ZONES ================= */}
       <OfficeFloor />

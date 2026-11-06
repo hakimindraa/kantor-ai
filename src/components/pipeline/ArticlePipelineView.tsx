@@ -3,6 +3,8 @@
 import React from 'react';
 import { useOfficeStore } from '@/store/officeStore';
 import { PipelineArticle, PipelineStage } from '@/types/pipeline';
+import { soundManager } from '@/services/audio/soundManager';
+import { ArticleReaderModal } from '@/components/dashboard/ArticleReaderModal';
 import confetti from 'canvas-confetti';
 import {
   PlusCircle,
@@ -13,7 +15,8 @@ import {
   PenTool,
   Camera,
   Clock,
-  BarChart2
+  BarChart2,
+  BookOpen
 } from 'lucide-react';
 
 const STAGES: {
@@ -65,6 +68,7 @@ export const ArticlePipelineView: React.FC = () => {
   const moveArticleStage = useOfficeStore((state) => state.moveArticleStage);
   const triggerManualPipelineRun = useOfficeStore((state) => state.triggerManualPipelineRun);
   const addActivityLog = useOfficeStore((state) => state.addActivityLog);
+  const openArticleReader = useOfficeStore((state) => state.openArticleReader);
 
   const getNextStage = (current: PipelineStage): PipelineStage | null => {
     switch (current) {
@@ -88,6 +92,7 @@ export const ArticlePipelineView: React.FC = () => {
     moveArticleStage(article.id, next);
 
     if (next === 'published') {
+      soundManager.playPublishChime();
       try {
         confetti({
           particleCount: 60,
@@ -253,27 +258,38 @@ export const ArticlePipelineView: React.FC = () => {
 
                       {/* Footer Actions */}
                       <div className="mt-3 pt-2 border-t border-[#262626] flex items-center justify-between text-[10px]">
-                        <span className="text-neutral-500 tabular-nums">SEO: {article.seoScore}</span>
+                        <button
+                          onClick={() => openArticleReader(article)}
+                          className="flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold transition-colors cursor-pointer"
+                          title="Buka Pratinjau Naskah 5W+1H & Export .md"
+                        >
+                          <BookOpen className="w-3 h-3" />
+                          <span>BACA</span>
+                        </button>
 
-                        {nextStage ? (
-                          <button
-                            onClick={() => handleAdvance(article)}
-                            className="flex items-center gap-1 px-2 py-0.5 bg-white text-black hover:bg-neutral-200 font-bold transition-colors cursor-pointer rounded-none"
-                          >
-                            <span>LANJUT</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
-                        ) : (
-                          <a
-                            href={article.publishedUrl || '#'}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-1 text-white hover:underline font-bold"
-                          >
-                            <span>LIVE URL</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="text-neutral-500 tabular-nums">SEO: {article.seoScore}</span>
+
+                          {nextStage ? (
+                            <button
+                              onClick={() => handleAdvance(article)}
+                              className="flex items-center gap-1 px-2 py-0.5 bg-white text-black hover:bg-neutral-200 font-bold transition-colors cursor-pointer rounded-none"
+                            >
+                              <span>LANJUT</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          ) : (
+                            <a
+                              href={article.publishedUrl || '#'}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center gap-1 text-white hover:underline font-bold"
+                            >
+                              <span>LIVE URL</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -289,6 +305,9 @@ export const ArticlePipelineView: React.FC = () => {
           );
         })}
       </div>
+
+      {/* ARTICLE READER MODAL */}
+      <ArticleReaderModal />
     </div>
   );
 };

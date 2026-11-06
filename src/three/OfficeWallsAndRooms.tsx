@@ -1,6 +1,214 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import * as THREE from 'three';
+import { useOfficeStore } from '@/store/officeStore';
+
+function createWarRoomVideoWallTexture(
+  articlesCount: number,
+  publishedToday: number,
+  latestTitle: string,
+  isIncident: boolean
+): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  // Background - Dark Cyber Slate
+  ctx.fillStyle = '#0B0F19';
+  ctx.fillRect(0, 0, 1024, 512);
+
+  // Outer border
+  ctx.strokeStyle = '#1E293B';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 1004, 492);
+
+  // Header Bar
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(10, 10, 1004, 60);
+
+  ctx.font = 'bold 20px "Courier New", monospace';
+  ctx.fillStyle = '#38BDF8';
+  ctx.textAlign = 'left';
+  ctx.fillText('NEWSROOM WAR ROOM // LIVE AUTOMATION MISSION CONTROL', 30, 48);
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = isIncident ? '#EF4444' : '#10B981';
+  ctx.fillText(isIncident ? '● SYSTEM WARNING' : '● ALL SYSTEMS NOMINAL', 990, 48);
+
+  // Telemetry Grid - 3 Large Cards
+  // Card 1: Articles Published
+  ctx.fillStyle = '#1E2433';
+  ctx.fillRect(30, 90, 300, 130);
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(30, 90, 300, 130);
+
+  ctx.textAlign = 'left';
+  ctx.font = '12px "Courier New", monospace';
+  ctx.fillStyle = '#94A3B8';
+  ctx.fillText('ARTIKEL HARI INI', 46, 120);
+  ctx.font = '900 42px "Courier New", monospace';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(`${publishedToday} POSTS`, 46, 175);
+  ctx.font = '11px "Courier New", monospace';
+  ctx.fillStyle = '#38BDF8';
+  ctx.fillText('Scheduled: 45m Waterfall', 46, 205);
+
+  // Card 2: Engine Status
+  ctx.fillStyle = '#1E2433';
+  ctx.fillRect(360, 90, 300, 130);
+  ctx.strokeStyle = '#34D399';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(360, 90, 300, 130);
+
+  ctx.font = '12px "Courier New", monospace';
+  ctx.fillStyle = '#94A3B8';
+  ctx.fillText('GEMINI & WEBP OPTIMIZER', 376, 120);
+  ctx.font = '900 36px "Courier New", monospace';
+  ctx.fillStyle = '#34D399';
+  ctx.fillText('-97.5% WEBP', 376, 175);
+  ctx.font = '11px "Courier New", monospace';
+  ctx.fillStyle = '#A7F3D0';
+  ctx.fillText('Avg Draft Time: 2.4s', 376, 205);
+
+  // Card 3: Neon Server Latency
+  ctx.fillStyle = '#1E2433';
+  ctx.fillRect(690, 90, 300, 130);
+  ctx.strokeStyle = isIncident ? '#EF4444' : '#A855F7';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(690, 90, 300, 130);
+
+  ctx.font = '12px "Courier New", monospace';
+  ctx.fillStyle = '#94A3B8';
+  ctx.fillText('NEON POSTGRES POOLER', 706, 120);
+  ctx.font = '900 42px "Courier New", monospace';
+  ctx.fillStyle = isIncident ? '#EF4444' : '#C084FC';
+  ctx.fillText(isIncident ? 'LATENCY 140ms' : '22ms 100% OK', 706, 175);
+  ctx.font = '11px "Courier New", monospace';
+  ctx.fillStyle = '#E9D5FF';
+  ctx.fillText('Auto-Purge Watchdog Active', 706, 205);
+
+  // Middle Section: Pipeline Progress Bar
+  ctx.fillStyle = '#131B2E';
+  ctx.fillRect(30, 240, 960, 110);
+  ctx.strokeStyle = '#334155';
+  ctx.strokeRect(30, 240, 960, 110);
+
+  ctx.font = 'bold 13px "Courier New", monospace';
+  ctx.fillStyle = '#F8FAFC';
+  ctx.fillText('AUTOMATED AGENT PIPELINE: SCOUT ➔ SCRIBE ➔ PIXEL ➔ CHRONOS ➔ RADAR ➔ HERMES', 46, 270);
+
+  // Stage steps
+  const steps = [
+    { label: 'SCOUT: RSS INGEST', color: '#F59E0B' },
+    { label: 'SCRIBE: GEMINI FLASH', color: '#10B981' },
+    { label: 'PIXEL: WEBP COMPRESS', color: '#F43F5E' },
+    { label: 'CHRONOS: PACING QUEUE', color: '#0EA5E9' },
+    { label: 'RADAR: GOOGLE INDEX', color: '#A855F7' }
+  ];
+  steps.forEach((st, i) => {
+    const sx = 46 + i * 190;
+    ctx.fillStyle = st.color;
+    ctx.fillRect(sx, 290, 175, 36);
+    ctx.fillStyle = '#0F172A';
+    ctx.font = 'bold 10px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(st.label, sx + 87, 312);
+  });
+
+  // Bottom Ticker / News Bulletin Bar
+  ctx.fillStyle = '#0F172A';
+  ctx.fillRect(30, 375, 960, 105);
+  ctx.strokeStyle = '#38BDF8';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(30, 375, 960, 105);
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#EF4444';
+  ctx.font = 'bold 12px "Courier New", monospace';
+  ctx.fillText('● BREAKING NEWS WIRE (KLIK DISPLAY UNTUK BACA ARTIKEL)', 46, 405);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 17px "Courier New", monospace';
+  ctx.fillText(`LATEST: "${latestTitle.slice(0, 68)}..."`, 46, 442);
+
+  ctx.fillStyle = '#64748B';
+  ctx.font = '11px "Courier New", monospace';
+  ctx.fillText(`Antrean Pipeline: ${articlesCount} Berita | Google Indexing: 100% OK`, 46, 465);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+const WarRoomVideoWall: React.FC<{
+  position: [number, number, number];
+  rotation?: [number, number, number];
+}> = ({ position, rotation = [0, 0, 0] }) => {
+  const articles = useOfficeStore((state) => state.articles);
+  const stats = useOfficeStore((state) => state.stats);
+  const incidentAlert = useOfficeStore((state) => state.incidentAlert);
+  const openArticleReader = useOfficeStore((state) => state.openArticleReader);
+
+  const latestArticle = articles[0] || {
+    id: 'latest',
+    title: 'Terobosan Ekosistem Otomasi Digital Nasional 2026',
+    category: 'Teknologi',
+    source: 'Antara News Feed',
+    currentStage: 'published',
+    assignedAgent: 'scout',
+    readTime: '3 min',
+    wordCount: 420,
+    seoScore: 96,
+    telegramNotified: true,
+    indexedGoogle: true
+  };
+
+  const videoWallTexture = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return createWarRoomVideoWallTexture(
+      articles.length,
+      stats.publishedToday || 18,
+      latestArticle.title,
+      incidentAlert.active
+    );
+  }, [articles.length, stats.publishedToday, latestArticle.title, incidentAlert.active]);
+
+  return (
+    <group
+      position={position}
+      rotation={rotation}
+      onClick={(e) => {
+        e.stopPropagation();
+        openArticleReader(latestArticle as any);
+      }}
+    >
+      {/* Outer Bezel Frame */}
+      <mesh castShadow>
+        <boxGeometry args={[5.8, 2.8, 0.08]} />
+        <meshStandardMaterial color="#1E232F" roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Screen Canvas Surface */}
+      <mesh position={[0, 0, 0.045]}>
+        <planeGeometry args={[5.6, 2.6]} />
+        {videoWallTexture ? (
+          <meshBasicMaterial map={videoWallTexture} />
+        ) : (
+          <meshBasicMaterial color="#0B0F19" />
+        )}
+      </mesh>
+
+      {/* Video Wall Soft Ambient Projector Glow */}
+      <pointLight position={[0, 0, 0.8]} intensity={0.9} distance={6} color="#38BDF8" />
+    </group>
+  );
+};
 
 // Helper component for architectural diorama wall with soft charcoal and fresh slate trim
 const DioramaWall: React.FC<{
@@ -63,17 +271,8 @@ export const OfficeWallsAndRooms: React.FC = () => {
       {/* ================= 2. LEFT PERIMETER WALL ================= */}
       <DioramaWall position={[-13.8, 0, 0]} size={[0.4, 4.2, 15.6]} color="#475569" />
 
-      {/* Newsroom Editorial Whiteboard on Left Wall */}
-      <group position={[-13.5, 2.3, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <mesh>
-          <boxGeometry args={[4.2, 1.8, 0.06]} />
-          <meshStandardMaterial color="#94A3B8" roughness={0.3} metalness={0.5} />
-        </mesh>
-        <mesh position={[0, 0, 0.04]}>
-          <boxGeometry args={[4.0, 1.6, 0.01]} />
-          <meshBasicMaterial color="#FFFFFF" />
-        </mesh>
-      </group>
+      {/* Big-Screen War Room Video Wall on Left Wall */}
+      <WarRoomVideoWall position={[-13.5, 2.3, 0]} rotation={[0, Math.PI / 2, 0]} />
 
       {/* ================= 3. RIGHT PERIMETER WALL ================= */}
       <DioramaWall position={[13.8, 0, 0]} size={[0.4, 4.2, 15.6]} color="#475569" />

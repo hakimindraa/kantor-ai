@@ -13,7 +13,27 @@ export interface LiveDbStats {
   error?: string;
 }
 
+interface CacheEntry {
+  stats: LiveDbStats;
+  timestamp: number;
+}
+
+// In-memory cache to prevent frequent cold-start latency & connection drops
+let statsCache: CacheEntry | null = null;
+const CACHE_TTL_MS = 30_000; // 30 seconds cache TTL
+let isFetching = false;
+
 export async function fetchNeonLiveStats(): Promise<LiveDbStats> {
+  const now = Date.now();
+
+  // 1. Return cached stats if still fresh
+  if (statsCache && now - statsCache.timestamp < CACHE_TTL_MS) {
+    return {
+      ...statsCache.stats,
+      latencyMs: 1 // Instant from memory
+    };
+  }
+
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     return {
@@ -30,36 +50,76 @@ export async function fetchNeonLiveStats(): Promise<LiveDbStats> {
     };
   }
 
+  // Prevent multiple concurrent roundtrips
+  if (isFetching && statsCache) {
+    return statsCache.stats;
+  }
+
+  isFetching = true;
   const startTime = Date.now();
+
   try {
     const sql = neon(dbUrl);
 
-    // Run parallel queries with timeout resilience
-    const [publishedRes, scheduledRes, draftRes, jurnalisDraftsRes, recentArts, recentDrafts, recentLogs] = await Promise.all([
-      sql`SELECT count(*)::int as count FROM articles WHERE status = 'published'`,
-      sql`SELECT count(*)::int as count FROM articles WHERE status = 'scheduled'`,
-      sql`SELECT count(*)::int as count FROM articles WHERE status = 'draft'`,
-      sql`SELECT count(*)::int as count FROM jurnalis_drafts`,
-      sql`SELECT id, slug, title, category, status, published_at as "publishedAt", cover_url as "coverUrl" FROM articles ORDER BY id DESC LIMIT 8`,
-      sql`SELECT id, title, source, status, category, created_at as "createdAt" FROM jurnalis_drafts ORDER BY id DESC LIMIT 6`,
-      sql`SELECT id, article_title as "articleTitle", category, status, model, duration_ms as "durationMs", created_at as "createdAt" FROM ai_generation_logs ORDER BY id DESC LIMIT 8`
-    ]);
+    // Single compound SQL query returning JSON - replaces 7 parallel HTTP round-trips
+    const rows = await sql`
+      SELECT json_build_object(
+        'publishedCount', (SELECT count(*)::int FROM articles WHERE status = 'published'),
+        'scheduledCount', (SELECT count(*)::int FROM articles WHERE status = 'scheduled'),
+        'draftCount', (SELECT count(*)::int FROM articles WHERE status = 'draft'),
+        'jurnalisDraftsCount', (SELECT count(*)::int FROM jurnalis_drafts),
+        'recentArticles', COALESCE((
+          SELECT json_agg(t) FROM (
+            SELECT id, slug, title, category, status, published_at as "publishedAt", cover_url as "coverUrl" 
+            FROM articles ORDER BY id DESC LIMIT 8
+          ) t
+        ), '[]'::json),
+        'recentDrafts', COALESCE((
+          SELECT json_agg(t) FROM (
+            SELECT id, title, source, status, category, created_at as "createdAt" 
+            FROM jurnalis_drafts ORDER BY id DESC LIMIT 6
+          ) t
+        ), '[]'::json),
+        'recentLogs', COALESCE((
+          SELECT json_agg(t) FROM (
+            SELECT id, article_title as "articleTitle", category, status, model, duration_ms as "durationMs", created_at as "createdAt" 
+            FROM ai_generation_logs ORDER BY id DESC LIMIT 8
+          ) t
+        ), '[]'::json)
+      ) as payload;
+    `;
 
+    const payload = (rows[0] as any)?.payload || {};
     const latencyMs = Date.now() - startTime;
 
-    return {
+    const freshStats: LiveDbStats = {
       connected: true,
       latencyMs,
-      publishedArticlesCount: Number(publishedRes[0]?.count || 0),
-      scheduledArticlesCount: Number(scheduledRes[0]?.count || 0),
-      draftArticlesCount: Number(draftRes[0]?.count || 0),
-      jurnalisDraftsCount: Number(jurnalisDraftsRes[0]?.count || 0),
-      recentArticles: recentArts || [],
-      recentDrafts: recentDrafts || [],
-      recentLogs: recentLogs || []
+      publishedArticlesCount: Number(payload.publishedCount || 0),
+      scheduledArticlesCount: Number(payload.scheduledCount || 0),
+      draftArticlesCount: Number(payload.draftCount || 0),
+      jurnalisDraftsCount: Number(payload.jurnalisDraftsCount || 0),
+      recentArticles: payload.recentArticles || [],
+      recentDrafts: payload.recentDrafts || [],
+      recentLogs: payload.recentLogs || []
     };
+
+    // Update in-memory cache
+    statsCache = {
+      stats: freshStats,
+      timestamp: Date.now()
+    };
+
+    return freshStats;
   } catch (err: any) {
-    console.warn('[fetchNeonLiveStats] Real DB error, falling back to mock:', err.message);
+    // If we have existing cached data, return it smoothly without failing
+    if (statsCache) {
+      return {
+        ...statsCache.stats,
+        latencyMs: Date.now() - startTime
+      };
+    }
+
     return {
       connected: false,
       latencyMs: Date.now() - startTime,
@@ -72,6 +132,8 @@ export async function fetchNeonLiveStats(): Promise<LiveDbStats> {
       recentLogs: [],
       error: err.message
     };
+  } finally {
+    isFetching = false;
   }
 }
 

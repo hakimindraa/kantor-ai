@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { AgentData, AgentId, AgentActivityLog, AgentStatus } from '@/types/agent';
-import { CameraPreset, MovementMode, CameraInteractionMode, CameraActionType } from '@/types/office';
+import {
+  CameraPreset,
+  MovementMode,
+  CameraInteractionMode,
+  CameraActionType,
+  OfficeDataMode,
+  TimeOfDay,
+  OfficeIncident,
+  HologramEvent,
+  RemoteActionType
+} from '@/types/office';
 import { PipelineArticle, PipelineStage } from '@/types/pipeline';
 import { INITIAL_AGENTS } from '@/services/mock/mockAgents';
 import { INITIAL_LOGS, SIMULATION_TEMPLATES } from '@/services/mock/mockActivities';
@@ -59,6 +69,8 @@ interface OfficeState {
   updateAgentStatus: (id: AgentId, status: AgentStatus) => void;
   updateAgentTask: (id: AgentId, task: string, activity: string) => void;
   toggleAgentWorkChill: (id: AgentId) => void;
+  setAgentWorking: (id: AgentId) => void;
+  setAgentIdle: (id: AgentId, chillPos?: [number, number, number], chillRot?: number) => void;
 
   // Admin Override Switches (Mandor Controls)
   adminOverrides: AdminOverrides;
@@ -113,6 +125,36 @@ interface OfficeState {
   isMobileSidebarOpen: boolean;
   setMobileSidebarOpen: (open: boolean) => void;
   toggleMobileSidebar: () => void;
+
+  // Dual Mode: Live Admin vs Demo Sandbox
+  dataMode: OfficeDataMode;
+  setDataMode: (mode: OfficeDataMode) => void;
+  toggleDataMode: () => void;
+
+  // Time of Day: Day, Sunset, Night
+  timeOfDay: TimeOfDay;
+  setTimeOfDay: (time: TimeOfDay) => void;
+  cycleTimeOfDay: () => void;
+
+  // Autonomous Pipeline
+  isAutonomousMode: boolean;
+  setAutonomousMode: (active: boolean) => void;
+  toggleAutonomousMode: () => void;
+
+  // Real-time Hologram Event & Incident Alert
+  activeHologram: HologramEvent | null;
+  setActiveHologram: (event: HologramEvent | null) => void;
+  incidentAlert: OfficeIncident;
+  setIncidentAlert: (incident: OfficeIncident) => void;
+
+  // Waterfall Countdown Timer (seconds)
+  chronosCountdown: number;
+  setChronosCountdown: (sec: number) => void;
+
+  // Article Reader Modal
+  activeReaderArticle: PipelineArticle | null;
+  openArticleReader: (article: PipelineArticle) => void;
+  closeArticleReader: () => void;
 }
 
 export const useOfficeStore = create<OfficeState>((set, get) => ({
@@ -176,6 +218,72 @@ export const useOfficeStore = create<OfficeState>((set, get) => ({
         ? `${agent.name} selesai dengan tugasnya & pergi ke dapur/breakroom untuk nyantai.`
         : `${agent.name} kembali ke meja PC-nya dan mulai bekerja aktif.`
     });
+  },
+  setAgentWorking: (id) => {
+    const state = get();
+    const agent = state.agents.find((a) => a.id === id);
+    if (!agent) return;
+    if (agent.status === 'working') return;
+
+    set((s) => ({
+      agents: s.agents.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              status: 'working',
+              position: [...a.deskPosition],
+              rotation: a.deskRotation,
+              currentActivity: `Bekerja aktif di meja PC: ${a.assignedTask}`,
+              lastActive: 'Baru saja'
+            }
+          : a
+      )
+    }));
+
+    state.addActivityLog({
+      agentId: agent.id,
+      agentName: agent.name,
+      agentColor: agent.color,
+      category: 'editorial',
+      level: 'success',
+      message: `${agent.name} kembali ke meja PC-nya dan mulai bekerja aktif.`
+    });
+  },
+  setAgentIdle: (id, chillPos, chillRot) => {
+    const state = get();
+    const agent = state.agents.find((a) => a.id === id);
+    if (!agent) return;
+
+    const nextPos = chillPos ? [...chillPos] as [number, number, number] : [...agent.chillPosition] as [number, number, number];
+    const nextRot = chillRot !== undefined ? chillRot : agent.chillRotation;
+
+    set((s) => ({
+      agents: s.agents.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              status: 'idle',
+              chillPosition: nextPos,
+              chillRotation: nextRot,
+              position: nextPos,
+              rotation: nextRot,
+              currentActivity: agent.chillActivity,
+              lastActive: 'Baru saja'
+            }
+          : a
+      )
+    }));
+
+    if (agent.status !== 'idle') {
+      state.addActivityLog({
+        agentId: agent.id,
+        agentName: agent.name,
+        agentColor: agent.color,
+        category: 'editorial',
+        level: 'info',
+        message: `${agent.name} selesai dengan tugasnya & berjalan santai ke area breakroom.`
+      });
+    }
   },
   updateAgentTask: (id, task, activity) => {
     set((state) => ({
@@ -438,5 +546,42 @@ export const useOfficeStore = create<OfficeState>((set, get) => ({
       level: 'success',
       message: `Scout: Berita baru masuk dari Antara ("${pickedTitle.substring(0, 35)}...").`
     });
-  }
+  },
+
+  // Dual Mode: Live Admin vs Demo Sandbox
+  dataMode: 'DEMO',
+  setDataMode: (mode) => set({ dataMode: mode }),
+  toggleDataMode: () =>
+    set((state) => ({ dataMode: state.dataMode === 'DEMO' ? 'LIVE' : 'DEMO' })),
+
+  // Time of Day: Day, Sunset, Night
+  timeOfDay: 'DAY',
+  setTimeOfDay: (time) => set({ timeOfDay: time }),
+  cycleTimeOfDay: () =>
+    set((state) => {
+      const order: TimeOfDay[] = ['DAY', 'SUNSET', 'NIGHT'];
+      const nextIdx = (order.indexOf(state.timeOfDay) + 1) % order.length;
+      return { timeOfDay: order[nextIdx] };
+    }),
+
+  // Autonomous Pipeline
+  isAutonomousMode: false,
+  setAutonomousMode: (active) => set({ isAutonomousMode: active }),
+  toggleAutonomousMode: () =>
+    set((state) => ({ isAutonomousMode: !state.isAutonomousMode })),
+
+  // Real-time Hologram Event & Incident Alert
+  activeHologram: null,
+  setActiveHologram: (event) => set({ activeHologram: event }),
+  incidentAlert: { type: 'NONE', message: '', active: false },
+  setIncidentAlert: (incident) => set({ incidentAlert: incident }),
+
+  // Waterfall Countdown Timer (seconds)
+  chronosCountdown: 875, // default 14 min 35 sec
+  setChronosCountdown: (sec) => set({ chronosCountdown: sec }),
+
+  // Article Reader Modal
+  activeReaderArticle: null,
+  openArticleReader: (article) => set({ activeReaderArticle: article }),
+  closeArticleReader: () => set({ activeReaderArticle: null })
 }));

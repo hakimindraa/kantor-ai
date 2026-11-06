@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useOfficeStore } from '@/store/officeStore';
+import { eventBridge } from '@/services/live/eventBridge';
 import {
   X,
   Play,
@@ -14,7 +15,12 @@ import {
   Brain,
   Rocket,
   Coffee,
-  Laptop
+  Laptop,
+  Radio,
+  Send,
+  Trash2,
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 
 export const AgentInfoPanel: React.FC = () => {
@@ -40,6 +46,20 @@ export const AgentInfoPanel: React.FC = () => {
   const isPaused = agent.status === 'paused';
   const isWorking = agent.status === 'working';
   const toggleAgentWorkChill = useOfficeStore((state) => state.toggleAgentWorkChill);
+
+  const [isExecutingAction, setIsExecutingAction] = useState(false);
+  const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  const handleRemoteTrigger = async (type: 'SCRAPE_NOW' | 'PUBLISH_NOW' | 'PURGE_CACHE' | 'TEST_TELEGRAM') => {
+    setIsExecutingAction(true);
+    setActionSuccessMsg(null);
+    const res = await eventBridge.executeRemoteAction(type);
+    setIsExecutingAction(false);
+    if (res.success) {
+      setActionSuccessMsg(res.message);
+      setTimeout(() => setActionSuccessMsg(null), 3500);
+    }
+  };
 
   const handleTogglePause = () => {
     const nextStatus = isPaused ? 'active' : 'paused';
@@ -417,6 +437,81 @@ export const AgentInfoPanel: React.FC = () => {
             <span>LAST ACTIVE: {agent.lastActive}</span>
             <span className="tabular-nums">PROGRESS: {agent.progress}%</span>
           </div>
+        </div>
+
+        {/* Remote Two-Way Trigger Section based on selected Agent */}
+        <div className="mt-3 p-2.5 bg-[#20242D] border border-cyan-900/60 rounded-none space-y-2 font-mono">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-cyan-300 font-bold flex items-center gap-1">
+              <Zap className="w-3 h-3 text-cyan-400" />
+              <span>COMMAND CENTER // 2-WAY TRIGGER</span>
+            </span>
+            <span className="text-[9px] px-1 py-0.2 bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">
+              LIVE
+            </span>
+          </div>
+
+          {actionSuccessMsg && (
+            <div className="p-1.5 bg-emerald-950/80 border border-emerald-600 text-emerald-300 text-[10px] flex items-center gap-1.5 animate-in fade-in">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span>{actionSuccessMsg}</span>
+            </div>
+          )}
+
+          {agent.id === 'scout' && (
+            <button
+              onClick={() => handleRemoteTrigger('SCRAPE_NOW')}
+              disabled={isExecutingAction}
+              className="w-full py-1.5 px-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-colors cursor-pointer border border-amber-300 flex items-center justify-center gap-1.5"
+            >
+              {isExecutingAction ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Radio className="w-3 h-3" />}
+              <span>SCRAPE RSS BERITA SEKARANG</span>
+            </button>
+          )}
+
+          {agent.id === 'chronos' && (
+            <button
+              onClick={() => handleRemoteTrigger('PUBLISH_NOW')}
+              disabled={isExecutingAction}
+              className="w-full py-1.5 px-2 bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold transition-colors cursor-pointer border border-sky-300 flex items-center justify-center gap-1.5"
+            >
+              {isExecutingAction ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Rocket className="w-3 h-3" />}
+              <span>RILIS ARTIKEL SEKARANG (BYPASS)</span>
+            </button>
+          )}
+
+          {agent.id === 'sentry' && (
+            <button
+              onClick={() => handleRemoteTrigger('PURGE_CACHE')}
+              disabled={isExecutingAction}
+              className="w-full py-1.5 px-2 bg-lime-500 hover:bg-lime-400 text-black text-xs font-bold transition-colors cursor-pointer border border-lime-300 flex items-center justify-center gap-1.5"
+            >
+              {isExecutingAction ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+              <span>AUTO-PURGE LOG & CACHE DB</span>
+            </button>
+          )}
+
+          {agent.id === 'hermes' && (
+            <button
+              onClick={() => handleRemoteTrigger('TEST_TELEGRAM')}
+              disabled={isExecutingAction}
+              className="w-full py-1.5 px-2 bg-orange-500 hover:bg-orange-400 text-black text-xs font-bold transition-colors cursor-pointer border border-orange-300 flex items-center justify-center gap-1.5"
+            >
+              {isExecutingAction ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+              <span>KIRIM TEST ALERT TELEGRAM</span>
+            </button>
+          )}
+
+          {(agent.id === 'scribe' || agent.id === 'pixel' || agent.id === 'radar') && (
+            <button
+              onClick={() => handleRemoteTrigger('SCRAPE_NOW')}
+              disabled={isExecutingAction}
+              className="w-full py-1.5 px-2 bg-[#313744] hover:bg-[#3D4454] text-white text-xs font-bold transition-colors cursor-pointer border border-[#5A6478] flex items-center justify-center gap-1.5"
+            >
+              {isExecutingAction ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3 text-cyan-400" />}
+              <span>TRIGGER PIPELINE CYCLE</span>
+            </button>
+          )}
         </div>
       </div>
 

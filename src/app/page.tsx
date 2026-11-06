@@ -13,6 +13,7 @@ import { OfficeAnalyticsView } from '@/components/analytics/OfficeAnalyticsView'
 import { BackendIntegrationView } from '@/components/backend/BackendIntegrationView';
 import { SettingsView } from '@/components/settings/SettingsView';
 import { useOfficeStore } from '@/store/officeStore';
+import { eventBridge } from '@/services/live/eventBridge';
 
 // Dynamically import 3D canvas with SSR disabled to ensure smooth WebGL initialization
 const Office3DCanvas = dynamic(
@@ -36,7 +37,7 @@ export default function HomePage() {
   const syncLiveDbStats = useOfficeStore((state) => state.syncLiveDbStats);
 
   React.useEffect(() => {
-    // Fetch live stats from real Neon Postgres database
+    // 1. Initial live stats fetch (instant 0-load fallback if DATABASE_URL is not set)
     const loadStats = async () => {
       try {
         const res = await fetch('/api/live-status');
@@ -44,14 +45,19 @@ export default function HomePage() {
         if (json?.data) {
           syncLiveDbStats(json.data);
         }
-      } catch (err) {
-        console.warn('Live DB polling fallback:', err);
+      } catch {
+        // Silently tolerate
       }
     };
-
     loadStats();
-    const interval = setInterval(loadStats, 15000);
-    return () => clearInterval(interval);
+
+    // 2. Start secure real-time webhook listener (<2ms local in-memory event bus)
+    eventBridge.startWebhookListener();
+    eventBridge.initCountdownTicker();
+
+    return () => {
+      eventBridge.stopWebhookListener();
+    };
   }, [syncLiveDbStats]);
 
   return (
